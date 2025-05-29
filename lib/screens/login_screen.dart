@@ -2,46 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 
-class LoginScreen extends ConsumerWidget {
-  const LoginScreen({super.key});
+class LoginScreen extends ConsumerStatefulWidget {
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+void _login() async {
+  print('📥 Tentative de connexion depuis LoginScreen');
+  await ref.read(authProvider.notifier).login(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
+      );
+
+  final state = ref.read(authProvider);
+  print('🧭 State après login : ${state.isAuthenticated}, ${state.error}');
+
+  if (state.isAuthenticated) {
+    Navigator.pushReplacementNamed(context, '/dashboard');
+  } else if (state.error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(state.error!)),
+    );
+  }
+}
+
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authProvider);
-    final authNotifier = ref.read(authProvider.notifier);
-
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connexion')),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: const InputDecoration(labelText: 'Mot de passe'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                authNotifier.login(
-                  emailController.text,
-                  passwordController.text,
-                );
-              },
-              child: const Text('Se connecter'),
-            ),
-            if (authState.error != null)
-              Text(authState.error!, style: const TextStyle(color: Colors.red)),
-            if (authState.isAuthenticated)
-              const Text('Connecté avec succès !'),
+            TextField(controller: _emailController, decoration: InputDecoration(labelText: 'Email')),
+            TextField(controller: _passwordController, decoration: InputDecoration(labelText: 'Mot de passe'), obscureText: true),
+            SizedBox(height: 20),
+            ElevatedButton(onPressed: _login, child: Text('Se connecter')),
           ],
         ),
       ),

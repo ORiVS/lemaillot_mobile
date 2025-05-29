@@ -1,56 +1,41 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
-
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.read(apiServiceProvider));
-});
 
 class AuthState {
   final bool isAuthenticated;
-  final String? token;
   final String? error;
+  final String? token;
 
-  AuthState({
-    this.isAuthenticated = false,
-    this.token,
-    this.error,
-  });
-
-  AuthState copyWith({
-    bool? isAuthenticated,
-    String? token,
-    String? error,
-  }) {
-    return AuthState(
-      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
-      token: token ?? this.token,
-      error: error ?? this.error,
-    );
-  }
+  AuthState({this.isAuthenticated = false, this.error, this.token});
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  final ApiService api;
+  final ApiService _apiService;
 
-  AuthNotifier(this.api) : super(AuthState());
+  AuthNotifier(this._apiService) : super(AuthState());
 
-  Future<void> login(String email, String password) async {
-    state = state.copyWith(error: null);
-    try {
-      final response = await api.login(email, password);
-      state = state.copyWith(
-        isAuthenticated: true,
-        token: response['token'],
-      );
-    } catch (e) {
-      state = state.copyWith(
-        isAuthenticated: false,
-        error: e.toString(),
-      );
-    }
-  }
+Future<void> login(String email, String password) async {
+  print('📡 Appel à login() de AuthNotifier');
+  try {
+    final data = await _apiService.login(email, password);
+    print('✅ Données reçues dans AuthNotifier : $data');
 
-  void logout() {
-    state = AuthState();
+    final access = data['access'];
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('access_token', access);
+    print('✅ Token sauvegardé dans SharedPreferences : $access');
+
+    state = AuthState(isAuthenticated: true, token: access);
+  } catch (e) {
+    print('❌ Erreur dans AuthNotifier : $e');
+    state = AuthState(error: e.toString());
   }
 }
+
+}
+
+final apiServiceProvider = Provider<ApiService>((ref) => ApiService());
+final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
+  (ref) => AuthNotifier(ref.watch(apiServiceProvider)),
+);
