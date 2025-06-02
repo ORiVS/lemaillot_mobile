@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/dashboard_screen.dart'; // À créer plus tard
+import 'screens/splash_screen.dart';    // À créer maintenant
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,39 +16,22 @@ void main() async {
   runApp(const ProviderScope(child: MyApp()));
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('access_token') != null;
-  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LeMaillot',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: FutureBuilder<bool>(
-        future: isLoggedIn(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else {
-            if (snapshot.data == true) {
-              return const DashboardScreen(); // À créer
-            } else {
-              return LoginScreen();
-            }
-          }
-        },
-      ),
+      home: const SplashScreen(),
       routes: {
-        '/dashboard': (context) => const DashboardScreen(), // À créer
+        '/login': (context) => LoginScreen(),
+        '/dashboard': (context) => const DashboardScreen(), 
       },
     );
   }

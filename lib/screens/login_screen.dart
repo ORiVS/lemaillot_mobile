@@ -12,14 +12,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
 
 void _login() async {
-  print('📥 Tentative de connexion depuis LoginScreen');
+  print(' Tentative de connexion depuis LoginScreen');
   await ref.read(authProvider.notifier).login(
         _emailController.text.trim(),
         _passwordController.text.trim(),
       );
 
   final state = ref.read(authProvider);
-  print('🧭 State après login : ${state.isAuthenticated}, ${state.error}');
+  print(' State après login : ${state.isAuthenticated}, ${state.error}');
 
   if (state.isAuthenticated) {
     Navigator.pushReplacementNamed(context, '/dashboard');
