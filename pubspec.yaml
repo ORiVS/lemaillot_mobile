@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv: ^5.2.1
   shared_preferences: ^2.5.3
   get: ^4.7.2
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -60,7 +62,6 @@ dev_dependencies:
 flutter:
   assets:
   - assets/images/logo.webp
-  - assets/images/   
   - assets/icons/
   - .env
 

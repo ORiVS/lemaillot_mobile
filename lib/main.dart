@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart'; // À créer plus tard
-import 'screens/splash_screen.dart';    // À créer maintenant
+import 'screens/home_screen.dart';
+import 'screens/splash_screen.dart';
+
+import 'blocs/auth/auth_bloc.dart';
+import 'repositories/auth_repoositories.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +16,16 @@ void main() async {
 
   print('✅ .env chargé : ${dotenv.env['API_URL']}');
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (context) => AuthBloc(authRepository: AuthRepository()),
+        ),
+      ],
+      child: const ProviderScope(child: MyApp()),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -30,8 +42,8 @@ class MyApp extends StatelessWidget {
       ),
       home: const SplashScreen(),
       routes: {
-        '/login': (context) => LoginScreen(),
-        '/dashboard': (context) => const DashboardScreen(), 
+        '/login': (context) => const LoginScreen(),
+        '/home': (context) => const HomeScreen(),
       },
     );
   }
