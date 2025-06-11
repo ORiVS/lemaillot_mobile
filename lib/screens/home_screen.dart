@@ -3,6 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/product/product_cubit.dart';
 import '../models/product.dart';
 import '../repositories/product_repository.dart';
+import '../blocs/product/product_state.dart';
+import '../blocs/product_detail/product_detail_cubit.dart';
+import '../repositories/product_detail_repository.dart';
+import '../screens/product_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,7 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Search bar
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
@@ -136,8 +139,20 @@ class ProductCard extends StatelessWidget {
   const ProductCard({super.key, required this.product});
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
+Widget build(BuildContext context) {
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => ProductDetailCubit(repository: ProductDetailRepository()),
+            child: ProductDetailScreen(productId: product.id),
+          ),
+        ),
+      );
+    },
+    child: Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -175,14 +190,13 @@ class ProductCard extends StatelessWidget {
           Row(
             children: [
               Text(
-                '\$${product.price.toStringAsFixed(2)}',
+                '${product.price.toStringAsFixed(0)} FCFA',
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
-              if (product.discountPrice != null)
-                const SizedBox(width: 6),
+              if (product.discountPrice != null) const SizedBox(width: 6),
               if (product.discountPrice != null)
                 Text(
-                  '\$${product.discountPrice!.toStringAsFixed(2)}',
+                  '${product.discountPrice!.toStringAsFixed(0)} FCFA',
                   style: const TextStyle(
                     decoration: TextDecoration.lineThrough,
                     color: Colors.grey,
@@ -193,6 +207,7 @@ class ProductCard extends StatelessWidget {
           )
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 }

@@ -1,21 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'product_state.dart';
 import '../../repositories/product_repository.dart';
 import '../../models/product.dart';
-
-part 'product_state.dart';
 
 class ProductCubit extends Cubit<ProductState> {
   final ProductRepository repository;
 
-  ProductCubit({required this.repository}) : super(ProductInitial());
+  ProductCubit({required this.repository}) : super(ProductLoading());
 
   Future<void> fetchProducts() async {
-    emit(ProductLoading());
     try {
+      emit(ProductLoading());
       final products = await repository.fetchAllProducts();
       emit(ProductLoaded(products));
     } catch (e) {
-      emit(ProductError('Failed to load products'));
+      emit(ProductError('Échec du chargement'));
     }
   }
 }

@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:developer';
 
 class AuthRepository {
   final Dio _dio = Dio(BaseOptions(baseUrl: dotenv.env['API_URL'] ?? ''));
@@ -28,11 +27,20 @@ class AuthRepository {
         throw Exception(response.data['detail'] ?? 'Erreur inconnue');
       }
     } on DioException catch (e) {
-      print('❌ Erreur API : ${e.response?.data}');
-      throw Exception(e.response?.data['detail'] ?? 'Erreur API');
-    } catch (e) {
-      print('❌ Autre erreur : $e');
-      rethrow;
+      final status = e.response?.statusCode;
+      final data = e.response?.data;
+      print('🛑 Erreur API - status: $status | data: $data');
+
+      String message = 'Erreur inconnue';
+      if (data is Map && data.containsKey('detail')) {
+        message = data['detail'];
+      } else if (data is String) {
+        message = data;
+      } else if (e.message != null) {
+        message = e.message!;
+      }
+
+      throw Exception(message);
     }
   }
 

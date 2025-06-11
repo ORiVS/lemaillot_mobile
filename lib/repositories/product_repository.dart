@@ -6,13 +6,20 @@ class ProductRepository {
   final Dio _dio = Dio(BaseOptions(baseUrl: dotenv.env['API_URL'] ?? ''));
 
   Future<List<Product>> fetchAllProducts() async {
+    print('🔗 API_URL utilisée : ${dotenv.env['API_URL']}');
     try {
       final response = await _dio.get('/api/store/products/');
       print('📦 Requête produits envoyée, status : ${response.statusCode}');
       print('📦 Données reçues : ${response.data}');
 
-      List data = response.data;
-      return data.map((json) => Product.fromJson(json)).toList();
+      if (response.statusCode == 200 && response.data is List) {
+        List data = response.data;
+        return data.map((json) => Product.fromJson(json)).toList();
+      } else {
+        throw Exception(
+          "⚠️ La réponse n'est pas une liste JSON. Reçu : ${response.data}",
+        );
+      }
     } catch (e) {
       print('❌ Erreur lors du chargement des produits : $e');
       rethrow;
