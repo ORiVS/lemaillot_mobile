@@ -57,21 +57,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 22,
-                      backgroundImage: AssetImage('assets/images/user.png'), // <-- à adapter
+                      backgroundImage: AssetImage('assets/images/user.jpg'), // <-- à adapter
                     ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/cart');
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black,
+                        ),
+                        child: const Icon(Icons.shopping_bag, color: Colors.white),
                       ),
-                      child: const Icon(Icons.shopping_bag, color: Colors.white),
                     ),
                   ],
                 ),
                 const SizedBox(height: 20),
+
 
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16),

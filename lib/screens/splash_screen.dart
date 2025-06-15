@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            Navigator.pushReplacementNamed(context, '/dashboard');
+            Navigator.pushReplacementNamed(context, '/home');
           } else if (state is Unauthenticated) {
             Navigator.pushReplacementNamed(context, '/login');
           }
@@ -46,7 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/images/logo.webp', height: 120),
+                Image.asset('assets/images/logo.webp', height: 120),
                 const SizedBox(height: 20),
                 const CircularProgressIndicator(),
               ],

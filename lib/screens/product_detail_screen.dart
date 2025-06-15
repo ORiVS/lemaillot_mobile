@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../blocs/product_detail/product_detail_cubit.dart';
 import '../blocs/product_detail/product_detail_state.dart';
-import '../repositories/product_detail_repository.dart';
+import '../blocs/cart/cart_bloc.dart';
+import '../blocs/cart/cart_event.dart';
+
 import '../models/product_detail.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -70,7 +73,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         vertical: 14,
                       ),
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      if (selectedSize == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Veuillez sélectionner une taille'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        return;
+                      }
+
+                      context.read<CartBloc>().add(AddToCart(
+                        productId: product.id,
+                        quantity: quantity,
+                      ));
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Produit ajouté au panier'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    },
                     child: const Text('Add to Bag'),
                   ),
                 ],
@@ -79,6 +104,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             body: ListView(
               padding: const EdgeInsets.all(24),
               children: [
+                // Galerie d'images (première image pour l'instant)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.network(
@@ -88,6 +114,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // Nom + Prix
                 Text(
                   product.name,
                   style: const TextStyle(
@@ -105,7 +133,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Size dropdown
+                // Dropdown de tailles
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
@@ -120,21 +148,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     onChanged: (value) {
                       setState(() => selectedSize = value);
                     },
-                    items:
-                        product.sizes
-                            .map(
-                              (e) => DropdownMenuItem<String>(
-                                value: e.size,
-                                child: Text('${e.size} (${e.stock} left)'),
-                              ),
-                            )
-                            .toList(),
+                    items: product.sizes
+                        .map((e) => DropdownMenuItem<String>(
+                      value: e.size,
+                      child: Text('${e.size} (${e.stock} left)'),
+                    ))
+                        .toList(),
                   ),
                 ),
 
                 const SizedBox(height: 16),
 
-                // Quantity selector
+                // Sélecteur de quantité
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
@@ -150,10 +175,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.remove),
-                        onPressed:
-                            quantity > 1
-                                ? () => setState(() => quantity--)
-                                : null,
+                        onPressed: quantity > 1
+                            ? () => setState(() => quantity--)
+                            : null,
                       ),
                       Text(
                         quantity.toString(),
@@ -168,6 +192,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
 
                 const SizedBox(height: 20),
+
+                // Description
                 const Text(
                   'Description',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -179,7 +205,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           );
         }
 
-        return const SizedBox.shrink(); // cas non prévu
+        return const SizedBox.shrink(); // Cas non prévu
       },
     );
   }
