@@ -1,4 +1,3 @@
-// 📁 auth_repoositories.dart
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -18,7 +17,7 @@ class AuthRepository {
         final refresh = response.data['refresh'];
 
         if (access == null || refresh == null) {
-          throw Exception('Tokens manquants');
+          throw Exception('Tokens manquants dans la réponse');
         }
 
         await saveTokens(access, refresh);
@@ -27,12 +26,23 @@ class AuthRepository {
         throw Exception(response.data['detail'] ?? 'Erreur inconnue');
       }
     } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
       final data = e.response?.data;
-      String message = 'Erreur inconnue';
+
+      print('❌ DioException: statusCode=$statusCode');
+      print('❌ Response data: $data');
+      print('❌ Message: ${e.message}');
+
       if (data is Map && data.containsKey('detail')) {
-        message = data['detail'];
+        throw Exception(data['detail']);
+      } else if (e.message != null) {
+        throw Exception('Erreur réseau : ${e.message}');
+      } else {
+        throw Exception('Erreur inconnue');
       }
-      throw Exception(message);
+    } catch (e) {
+      print('❌ Autre erreur : $e');
+      throw Exception('Erreur inattendue : $e');
     }
   }
 
@@ -75,7 +85,7 @@ class AuthRepository {
         return newAccess;
       }
     } catch (e) {
-      print('❌ Erreur de refresh token : $e');
+      print('❌ Erreur lors du refresh du token : $e');
     }
 
     return null;

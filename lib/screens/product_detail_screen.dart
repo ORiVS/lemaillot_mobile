@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -87,6 +89,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       context.read<CartBloc>().add(AddToCart(
                         productId: product.id,
                         quantity: quantity,
+                        size: selectedSize!,
                       ));
 
                       ScaffoldMessenger.of(context).showSnackBar(

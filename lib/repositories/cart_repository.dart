@@ -17,7 +17,6 @@ class CartRepository {
     return {'Authorization': 'Bearer $token'};
   }
 
-
   Future<Response> _handleRequest(
       Future<Response> Function(Map<String, String> headers) requestBuilder,
       ) async {
@@ -59,31 +58,42 @@ class CartRepository {
     }).then((res) => res.data!);
   }
 
-  Future<void> addProductToCart(int productId, int quantity) async {
+  Future<void> addProductToCart(int productId, int quantity, String size) async {
     await _handleRequest((headers) async {
       return await _dio.post(
         '/cart/add/',
-        data: {'product': productId, 'quantity': quantity},
+        data: {
+          'product': productId,
+          'quantity': quantity,
+          'size': size,
+        },
         options: Options(headers: headers),
       );
     });
   }
 
-  Future<void> updateCartItem(int productId, int quantity) async {
+  Future<void> updateCartItem(int productId, int quantity, String size) async {
     await _handleRequest((headers) async {
       return await _dio.put(
         '/cart/update/',
-        data: {'product': productId, 'quantity': quantity},
+        data: {
+          'product': productId,
+          'quantity': quantity,
+          'size': size,
+        },
         options: Options(headers: headers),
       );
     });
   }
 
-  Future<void> removeFromCart(int productId) async {
+  Future<void> removeFromCart(int productId, String size) async {
     await _handleRequest((headers) async {
       return await _dio.delete(
         '/cart/remove/',
-        data: {'product': productId},
+        data: {
+          'product': productId,
+          'size': size,
+        },
         options: Options(headers: headers),
       );
     });
@@ -98,6 +108,7 @@ class CartRepository {
     });
   }
 }
+
 
 class TokenRefreshFailedException implements Exception {
   final String message;

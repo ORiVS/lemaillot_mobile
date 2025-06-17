@@ -31,7 +31,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   Future<void> _onAddToCart(AddToCart event, Emitter<CartState> emit) async {
     try {
-      await repository.addProductToCart(event.productId, event.quantity);
+      await repository.addProductToCart(event.productId, event.quantity, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
       if (e is TokenRefreshFailedException) {
@@ -44,7 +44,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   Future<void> _onUpdateCartItem(UpdateCartItem event, Emitter<CartState> emit) async {
     try {
-      await repository.updateCartItem(event.productId, event.quantity);
+      await repository.updateCartItem(event.productId, event.quantity, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
       if (e is TokenRefreshFailedException) {
@@ -57,7 +57,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
   Future<void> _onRemoveFromCart(RemoveFromCart event, Emitter<CartState> emit) async {
     try {
-      await repository.removeFromCart(event.productId);
+      await repository.removeFromCart(event.productId, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
       if (e is TokenRefreshFailedException) {

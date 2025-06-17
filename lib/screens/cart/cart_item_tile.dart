@@ -31,11 +31,12 @@ class CartItemTile extends StatelessWidget {
                 children: [
                   Text(item.productName, style: const TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
-                  const Text("Size: M  Color: -", style: TextStyle(color: Colors.grey)),
+                  Text("Taille : ${item.size}", style: const TextStyle(color: Colors.grey)),
+                  Text("Quantité : ${item.quantity}", style: const TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
-            Text("${item.quantity * 10000} FCFA"), // 🔁 À remplacer par le vrai prix unitaire
+            Text("${(item.quantity * item.productPrice).toStringAsFixed(0)} FCFA"),
             const SizedBox(width: 8),
             Column(
               children: [
@@ -45,6 +46,7 @@ class CartItemTile extends StatelessWidget {
                     context.read<CartBloc>().add(UpdateCartItem(
                       productId: item.product,
                       quantity: item.quantity + 1,
+                      size: item.size, // 👈 important
                     ));
                   },
                 ),
@@ -54,6 +56,7 @@ class CartItemTile extends StatelessWidget {
                     context.read<CartBloc>().add(UpdateCartItem(
                       productId: item.product,
                       quantity: item.quantity - 1,
+                      size: item.size, // 👈 important
                     ));
                   },
                 ),
