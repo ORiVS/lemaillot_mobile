@@ -7,6 +7,8 @@ import '../blocs/product/product_state.dart';
 import '../blocs/product_detail/product_detail_cubit.dart';
 import '../repositories/product_detail_repository.dart';
 import '../screens/product_detail_screen.dart';
+import '../theme/app_icons.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late ProductCubit _productCubit;
+  int _selectedIndex = 0;
+
 
   @override
   void initState() {
@@ -37,17 +41,51 @@ class _HomeScreenState extends State<HomeScreen> {
       value: _productCubit,
       child: Scaffold(
         backgroundColor: Colors.white,
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: 0,
-          selectedItemColor: Colors.black,
-          unselectedItemColor: Colors.grey,
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-            BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: ''),
-            BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-          ],
+        extendBody: true,
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+          child: Container(
+            height: 70,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 12,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() => _selectedIndex = 0),
+                  child: Icon(AppIcons.home,
+                      color: _selectedIndex == 0 ? Colors.black : Colors.grey),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedIndex = 1),
+                  child: Icon(AppIcons.notifications,
+                      color: _selectedIndex == 1 ? Colors.black : Colors.grey),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedIndex = 2),
+                  child: Icon(AppIcons.orders,
+                      color: _selectedIndex == 2 ? Colors.black : Colors.grey),
+                ),
+                GestureDetector(
+                  onTap: () => setState(() => _selectedIndex = 3),
+                  child: Icon(AppIcons.profile,
+                      color: _selectedIndex == 3 ? Colors.black : Colors.grey),
+                ),
+              ],
+            ),
+          ),
         ),
+
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -71,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: BoxShape.circle,
                           color: Colors.black,
                         ),
-                        child: const Icon(Icons.shopping_bag, color: Colors.white),
+                          child: Icon(AppIcons.cart, color: Colors.white),
                       ),
                     ),
                   ],
@@ -87,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const TextField(
                     decoration: InputDecoration(
-                      icon: Icon(Icons.search),
+                      icon: Icon(AppIcons.search),
                       hintText: 'Search',
                       border: InputBorder.none,
                     ),
@@ -181,7 +219,7 @@ Widget build(BuildContext context) {
               const Positioned(
                 top: 8,
                 right: 8,
-                child: Icon(Icons.favorite_border),
+                child: Icon(AppIcons.favorite),
               ),
             ],
           ),

@@ -7,6 +7,8 @@ import 'package:flutter/material.dart';
 import 'cart_coupon_field.dart';
 import 'cart_item_tile.dart';
 import 'cart_summary.dart';
+import 'cart_header.dart';
+
 
 class CartFilledView extends StatelessWidget {
   final Cart cart;
@@ -19,17 +21,7 @@ class CartFilledView extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-              const Text("Cart", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              TextButton(
-                onPressed: () => context.read<CartBloc>().add(ClearCart()),
-                child: const Text("Remove All"),
-              ),
-            ],
-          ),
+          const CartHeader(),
           const SizedBox(height: 16),
           ...cart.items.map((item) => CartItemTile(item: item)),
           const SizedBox(height: 24),
