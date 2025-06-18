@@ -21,11 +21,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       final cart = await repository.fetchCart();
       emit(CartLoaded(cart));
     } catch (e) {
-      if (e is TokenRefreshFailedException) {
-        emit(CartTokenRefreshFailed('Session expirée. Veuillez vous reconnecter.'));
-      } else {
         emit(CartError('Erreur lors du chargement du panier'));
-      }
     }
   }
 
@@ -34,11 +30,8 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await repository.addProductToCart(event.productId, event.quantity, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
-      if (e is TokenRefreshFailedException) {
-        emit(CartTokenRefreshFailed('Session expirée. Veuillez vous reconnecter.'));
-      } else {
+
         emit(CartError('Erreur lors de l’ajout au panier'));
-      }
     }
   }
 
@@ -47,11 +40,9 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await repository.updateCartItem(event.productId, event.quantity, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
-      if (e is TokenRefreshFailedException) {
-        emit(CartTokenRefreshFailed('Session expirée. Veuillez vous reconnecter.'));
-      } else {
+
         emit(CartError('Erreur lors de la mise à jour de l’article'));
-      }
+
     }
   }
 
@@ -60,11 +51,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await repository.removeFromCart(event.productId, event.size); // 👈 ajout de size
       add(LoadCart());
     } catch (e) {
-      if (e is TokenRefreshFailedException) {
-        emit(CartTokenRefreshFailed('Session expirée. Veuillez vous reconnecter.'));
-      } else {
         emit(CartError('Erreur lors de la suppression de l’article'));
-      }
     }
   }
 
@@ -73,11 +60,7 @@ class CartBloc extends Bloc<CartEvent, CartState> {
       await repository.clearCart();
       add(LoadCart());
     } catch (e) {
-      if (e is TokenRefreshFailedException) {
-        emit(CartTokenRefreshFailed('Session expirée. Veuillez vous reconnecter.'));
-      } else {
         emit(CartError('Erreur lors du vidage du panier'));
-      }
     }
   }
 }

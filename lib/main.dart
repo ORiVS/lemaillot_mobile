@@ -15,6 +15,9 @@ import 'blocs/cart/cart_bloc.dart';
 import 'blocs/cart/cart_event.dart';
 import 'repositories/cart_repository.dart';
 
+// 👉 Clé globale pour navigation sans contexte
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -34,7 +37,6 @@ void main() async {
             ),
           )..add(LoadCart()),
         ),
-
       ],
       child: const ProviderScope(child: MyApp()),
     ),
@@ -47,6 +49,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'LeMaillot',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

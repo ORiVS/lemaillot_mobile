@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return _buildProductView();
       case 2:
         return BlocProvider(
-          create: (_) => OrderBloc(OrderRepository(Dio())),
+          create: (_) => OrderBloc(OrderRepository()),
           child: OrderListScreen(),
         );
       default:

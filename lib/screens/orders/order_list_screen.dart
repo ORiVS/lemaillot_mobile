@@ -38,25 +38,57 @@ class OrderListScreen extends StatelessWidget {
             }
 
             return ListView.builder(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               itemCount: state.orders.length,
               itemBuilder: (context, index) {
                 final order = state.orders[index];
-                return ListTile(
-                  title: Text("Order #${order.orderNumber}"),
-                  subtitle: Text("${order.items.length} items"),
-                  trailing: const Icon(Icons.chevron_right),
+                return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (_) => BlocProvider(
-                          create: (_) => OrderBloc(OrderRepository(Dio()))
+                          create: (_) => OrderBloc(OrderRepository())
                             ..add(FetchOrderDetail(order.id)),
                           child: OrderDetailScreen(orderId: order.id),
                         ),
                       ),
                     );
                   },
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[100],
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.receipt_long, size: 32, color: Colors.black54),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Order #${order.orderNumber}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                "${order.items.length} item${order.items.length > 1 ? 's' : ''}",
+                                style: const TextStyle(color: Colors.black54),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.chevron_right, color: Colors.black54),
+                      ],
+                    ),
+                  ),
                 );
               },
             );
