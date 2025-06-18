@@ -39,9 +39,11 @@ class CartScreen extends StatelessWidget {
               return const EmptyCartView();
             }
             return CartFilledView(cart: cart);
+
           }
 
           return const SizedBox.shrink();
+
         },
       ),
     );
