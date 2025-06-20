@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'See All',
+              'Tous les maillots',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
           ),

@@ -1,15 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../../../blocs/profile/profile_cubit.dart';
 import '../../../blocs/profile/profile_state.dart';
+import '../../blocs/orders/order_bloc.dart';
+import '../../repositories/order_repository.dart';
+import '../home_screen.dart';
+import '../orders/order_list_screen.dart';
 import 'edit_profil_screen.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  int _selectedIndex = 3;
+
+  void _onTabTapped(int index) {
+    if (index == _selectedIndex) return;
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
+        break;
+      case 1:
+      // TODO: Naviguer vers NotificationsScreen quand il sera prêt
+        break;
+      case 2:
+        Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => BlocProvider(
+      create: (_) => OrderBloc(OrderRepository()),
+      child: OrderListScreen(),
+    ),
+  ),
+);
+
+        break;
+      case 3:
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
@@ -26,8 +66,7 @@ class ProfileScreen extends StatelessWidget {
                     radius: 48,
                     backgroundImage: profile.profilePicture != null
                         ? NetworkImage(profile.profilePicture!)
-                        : const AssetImage('assets/images/avatar_placeholder.png')
-                    as ImageProvider,
+                        : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
                   ),
                   const SizedBox(height: 24),
                   Container(
@@ -67,40 +106,30 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             );
                             if (result == true) {
-                              context.read<ProfileCubit>().loadProfile(); // recharge après modification
+                              context.read<ProfileCubit>().loadProfile();
                             }
                           },
-                          child: const Text("Modifier"),
+                          child: const Text(
+                            "Edit",
+                            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
+                          ),
                         )
-
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ...[
-                    "Address",
-                    "Wishlist",
-                    "Payment",
-                    "Help",
-                    "Support"
-                  ].map(
-                        (title) => ListTile(
-                      title: Text(title),
-                      trailing: const Icon(Icons.chevron_right),
-                      tileColor: Colors.grey.shade200,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                      onTap: () {
-                        // TODO: action pour chaque section
-                      },
-                    ),
-                  ),
+                  const SizedBox(height: 8),
+                  _buildMenuItem("Wishlist", LucideIcons.heart),
+                  const SizedBox(height: 8),
+                  _buildMenuItem("Payment", LucideIcons.creditCard),
+                  const SizedBox(height: 8),
+                  _buildMenuItem("Help", LucideIcons.helpCircle),
+                  const SizedBox(height: 8),
+                  _buildMenuItem("Support", LucideIcons.headphones),
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                      // Déconnexion : appeler cubit.logout() + navigation
+                      // TODO: implémenter logout
                     },
                     child: const Text(
                       "Sign Out",
@@ -118,16 +147,61 @@ class ProfileScreen extends StatelessWidget {
           },
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 4,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications_none), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.support_agent), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person_2_outlined), label: ''),
-        ],
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        child: Container(
+          height: 70,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              GestureDetector(
+                onTap: () => _onTabTapped(0),
+                child: Icon(LucideIcons.home, color: _selectedIndex == 0 ? Colors.black : Colors.grey),
+              ),
+              GestureDetector(
+                onTap: () => _onTabTapped(1),
+                child: Icon(LucideIcons.bell, color: _selectedIndex == 1 ? Colors.black : Colors.grey),
+              ),
+              GestureDetector(
+                onTap: () => _onTabTapped(2),
+                child: Icon(LucideIcons.fileText, color: _selectedIndex == 2 ? Colors.black : Colors.grey),
+              ),
+              GestureDetector(
+                onTap: () => _onTabTapped(3),
+                child: Icon(LucideIcons.user, color: _selectedIndex == 3 ? Colors.black : Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuItem(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: ListTile(
+        title: Text(title),
+        leading: Icon(icon),
+        trailing: const Icon(Icons.chevron_right),
+        tileColor: Colors.grey.shade200,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+        onTap: () {},
       ),
     );
   }
