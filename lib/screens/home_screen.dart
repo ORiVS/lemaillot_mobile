@@ -1,17 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
+import '../blocs/profile/profile_cubit.dart';
 import '../models/product.dart';
 import '../repositories/product_repository.dart';
 import '../blocs/product_detail/product_detail_cubit.dart';
 import '../repositories/product_detail_repository.dart';
+import '../repositories/profile_repository.dart';
 import '../screens/product_detail_screen.dart';
 import '../screens/orders/order_list_screen.dart';
 import '../repositories/order_repository.dart';
 import '../blocs/orders/order_bloc.dart';
 import '../theme/app_icons.dart';
+import 'profile/ProfileScreen.dart';
+import '../repositories/dio_client.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,10 +65,25 @@ class _HomeScreenState extends State<HomeScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const CircleAvatar(
-                radius: 22,
-                backgroundImage: AssetImage('assets/images/user.jpg'),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => ProfileCubit(ProfileRepository(DioClient.createDio()))..loadProfile(),
+                        child: const ProfileScreen(),
+                      ),
+                    ),
+                  );
+                },
+                child: const CircleAvatar(
+                  radius: 22,
+                  backgroundImage: AssetImage('assets/images/user.jpg'),
+                ),
               ),
+
+
               GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/cart');

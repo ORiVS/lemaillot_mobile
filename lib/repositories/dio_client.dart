@@ -20,6 +20,8 @@ class DioClient {
             if (token != null) {
               options.headers['Authorization'] = 'Bearer $token';
               print('🔐 Token ajouté au header : $token');
+              print('🔐 Authorization header : ${options.headers['Authorization']}');
+
             } else {
               print('⚠️ Aucun token trouvé');
             }
@@ -30,6 +32,7 @@ class DioClient {
           if (e.response?.statusCode == 401 &&
               e.response?.data['code'] == 'token_not_valid') {
             print('🔐 Token expiré → redirection vers /login');
+
             final prefs = await SharedPreferences.getInstance();
             await prefs.clear();
             navigatorKey.currentState?.pushNamedAndRemoveUntil('/login', (_) => false);
