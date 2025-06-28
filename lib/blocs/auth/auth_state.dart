@@ -28,15 +28,29 @@ class AuthSuccess extends AuthState {
 }
 
 class AuthFailure extends AuthState {
-  final String message;
+  final String error;
 
-  const AuthFailure(this.message);
+  const AuthFailure({required this.error});
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [error];
 }
+
 
 class Unauthenticated extends AuthState {
   const Unauthenticated();
-  
+}
+
+class AuthVerificationSuccess extends AuthState {
+  final String message;
+  const AuthVerificationSuccess(this.message);
+}
+
+class AuthNeedsVerification extends AuthState {
+  final String email;
+
+  const AuthNeedsVerification(this.email);
+
+  @override
+  List<Object> get props => [email];
 }

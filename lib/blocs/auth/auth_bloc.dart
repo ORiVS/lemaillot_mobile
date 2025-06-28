@@ -13,7 +13,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         final token = await authRepository.login(event.email, event.password);
         emit(AuthSuccess(token));
       } catch (e) {
-        emit(AuthFailure(e.toString().replaceAll('Exception: ', '')));
+        emit(AuthFailure(error: e.toString().replaceAll('Exception: ', '')));
       }
     });
 
@@ -36,5 +36,48 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
       }
     });
+
+    on<RegisterRequested>((event, emit) async {
+      emit(const AuthLoading());
+      try {
+        await authRepository.register(
+          event.firstName,
+          event.lastName,
+          event.email,
+          event.username,
+          event.password,
+          event.phonenumber,
+        );
+        emit(AuthNeedsVerification(event.email));
+      } catch (e) {
+        emit(AuthFailure(error: e.toString().replaceAll('Exception: ', '')));
+      }
+    });
+
+
+    on<VerifyRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        final message = await authRepository.verifyAccount(event.email, event.code);
+        emit(AuthVerificationSuccess(message));
+      } catch (e) {
+        emit(AuthFailure(error: e.toString().replaceAll('Exception: ', '')));
+      }
+    });
+
+
+    on<ResendCodeRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        await authRepository.resendCode(event.email);
+        emit(const AuthCodeResent());
+      } catch (e) {
+        emit(AuthFailure(error: e.toString().replaceAll('Exception: ', '')));
+      }
+    });
   }
 }
+class AuthCodeResent extends AuthState {
+  const AuthCodeResent();
+}
+

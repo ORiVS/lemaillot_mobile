@@ -12,6 +12,7 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: BlocConsumer<CartBloc, CartState>(
         listener: (context, state) {
           if (state is CartTokenRefreshFailed) {

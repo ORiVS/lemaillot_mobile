@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../blocs/profile/profile_cubit.dart';
@@ -15,6 +16,8 @@ import '../screens/orders/order_list_screen.dart';
 import '../repositories/order_repository.dart';
 import '../blocs/orders/order_bloc.dart';
 import '../theme/app_icons.dart';
+import '../utils/auth_guard.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 import 'profile/ProfileScreen.dart';
 import '../repositories/dio_client.dart';
 
@@ -85,9 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
 
               GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, '/cart');
-                },
+                onTap: () async {
+                  final allowed = await checkAuthOrPrompt(context);
+                  if (allowed) {
+                    Navigator.pushNamed(context, '/cart');
+                  }
+                  },
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
@@ -160,48 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         extendBody: true,
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-          child: Container(
-            height: 70,
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 12,
-                  offset: Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = 0),
-                  child: Icon(AppIcons.home,
-                      color: _selectedIndex == 0 ? Colors.black : Colors.grey),
-                ),
-                GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = 1),
-                  child: Icon(AppIcons.notifications,
-                      color: _selectedIndex == 1 ? Colors.black : Colors.grey),
-                ),
-                GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = 2),
-                  child: Icon(AppIcons.orders,
-                      color: _selectedIndex == 2 ? Colors.black : Colors.grey),
-                ),
-                GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = 3),
-                  child: Icon(AppIcons.profile,
-                      color: _selectedIndex == 3 ? Colors.black : Colors.grey),
-                ),
-              ],
-            ),
-          ),
+        bottomNavigationBar: CustomBottomNavBar(
+          selectedIndex: _selectedIndex,
+          onItemTapped: (index) => setState(() => _selectedIndex = index),
         ),
         body: SafeArea(child: _buildBody()),
       ),

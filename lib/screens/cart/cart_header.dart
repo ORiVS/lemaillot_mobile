@@ -31,6 +31,7 @@ class CartHeader extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
+                    backgroundColor: Colors.white,
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
                       child: Column(
@@ -51,33 +52,29 @@ class CartHeader extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  style: OutlinedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context),
+                                child: const Text(
+                                  'Non',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: const Text('Non'),
                                 ),
                               ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Ferme la boîte
-                                    context.read<CartBloc>().add(ClearCart()); // Vide le panier
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  context.read<CartBloc>().add(ClearCart());
+                                },
+                                child: const Text(
+                                  'Oui',
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.normal,
                                   ),
-                                  child: const Text('Oui'),
                                 ),
                               ),
                             ],

@@ -7,22 +7,25 @@ class EmptyCartView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const CartHeader(),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(LucideIcons.shoppingBag, size: 100, color: Colors.amber),
-                SizedBox(height: 20),
-                Text("Your Cart is Empty", style: TextStyle(fontSize: 18)),
-              ],
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          const CartHeader(),
+          Expanded(
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(LucideIcons.shoppingBag, size: 100, color: Colors.amber),
+                  SizedBox(height: 20),
+                  Text("Votre panier est vide", style: TextStyle(fontSize: 18)),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

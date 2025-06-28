@@ -1,15 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../main.dart'; // Pour accéder à navigatorKey
+import '../main.dart';
 
 class DioClient {
   static Dio createDio({bool withAuth = true}) {
     final dio = Dio(BaseOptions(
       baseUrl: dotenv.env['API_URL'] ?? '',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
+      connectTimeout: const Duration(seconds: 20),
+      receiveTimeout: const Duration(seconds: 20),
+      sendTimeout: const Duration(seconds: 20),
     ));
+
+    print('🕐 Dio Timeout config → '
+        'connectTimeout=${dio.options.connectTimeout}, '
+        'receiveTimeout=${dio.options.receiveTimeout}, '
+        'sendTimeout=${dio.options.sendTimeout}');
 
     dio.interceptors.add(
       InterceptorsWrapper(
@@ -21,7 +27,6 @@ class DioClient {
               options.headers['Authorization'] = 'Bearer $token';
               print('🔐 Token ajouté au header : $token');
               print('🔐 Authorization header : ${options.headers['Authorization']}');
-
             } else {
               print('⚠️ Aucun token trouvé');
             }

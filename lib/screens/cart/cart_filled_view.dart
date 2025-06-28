@@ -18,28 +18,32 @@
     @override
     Widget build(BuildContext context) {
       return SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            const CartHeader(),
-            const SizedBox(height: 16),
-            ...cart.items.map((item) => CartItemTile(item: item)),
-            const SizedBox(height: 24),
-            CartSummary(cart: cart),
-            const SizedBox(height: 16),
-            CouponField(),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              ),
-              onPressed: () {},
-              child: const Text("Commander", style: TextStyle(fontSize: 16)),
-            )
-          ],
+        child: Container(
+          color: Colors.white,
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              const CartHeader(),
+              const SizedBox(height: 16),
+              ...cart.items.map((item) => CartItemTile(item: item)),
+              const SizedBox(height: 24),
+              CartSummary(cart: cart),
+              const SizedBox(height: 16),
+              CouponField(),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                onPressed: () {},
+                child: const Text("Commander", style: TextStyle(fontSize: 16)),
+              )
+            ],
+          ),
+
         ),
       );
     }

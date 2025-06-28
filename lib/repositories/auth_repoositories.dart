@@ -90,4 +90,104 @@ class AuthRepository {
 
     return null;
   }
+
+  Future<void> register(
+      String firstName,
+      String lastName,
+      String email,
+      String username,
+      String password,
+      String phoneNumber,
+      ) async {
+    try {
+      final response = await _dio.post(
+        '/accounts/registerUser/',
+        data: {
+          'first_name': firstName,
+          'last_name': lastName,
+          'username': username,
+          'email': email,
+          'password': password,
+          'phone_number': phoneNumber,
+        },
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        print('✅ Inscription réussie. Redirigez vers la vérification.');
+        // Pas de token ici, la vérification sera faite après
+        return;
+      } else {
+        throw Exception(response.data['detail'] ?? 'Erreur lors de l’inscription');
+      }
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      print('❌ Inscription DioException: ${e.message}');
+      print('❌ Données retournées : $data');
+
+      if (data is Map && data.containsKey('detail')) {
+        throw Exception(data['detail']);
+      } else if (data is Map && data.isNotEmpty) {
+        // Affiche les premières erreurs retournées par DRF
+        final firstKey = data.keys.first;
+        final firstError = data[firstKey];
+        throw Exception('$firstKey: ${firstError[0]}');
+      } else {
+        throw Exception('Erreur réseau : ${e.message}');
+      }
+    } catch (e) {
+      print('❌ Erreur inscription : $e');
+      throw Exception('Erreur inattendue : $e');
+    }
+  }
+
+
+  Future<String> verifyAccount(String email, String code) async {
+    try {
+      final response = await _dio.post(
+        '/accounts/verify-code/',
+        data: {
+          'email': email,
+          'code': code,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // ✅ Lire le message
+        final message = response.data['message'] ?? 'Compte activé avec succès.';
+        return message;
+      } else {
+        throw Exception(response.data['detail'] ?? 'Échec de la vérification');
+      }
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      print('❌ Erreur vérification Dio: ${e.message}');
+      if (data is Map && data.containsKey('detail')) {
+        throw Exception(data['detail']);
+      } else {
+        throw Exception('Erreur réseau : ${e.message}');
+      }
+    } catch (e) {
+      throw Exception('Erreur inattendue : $e');
+    }
+  }
+
+  Future<void> resendCode(String email) async {
+    try {
+      final response = await _dio.post(
+        '/accounts/resend-code/',
+        data: {
+          'email': email,
+          'method': 'email', // méthode toujours "email"
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(response.data['detail'] ?? 'Erreur lors du renvoi du code');
+      }
+    } on DioException catch (e) {
+      final data = e.response?.data;
+      print('❌ Erreur renvoi code Dio: ${e.message}');
+      throw Exception(data['detail'] ?? 'Erreur réseau : ${e.message}');
+    }
+  }
 }

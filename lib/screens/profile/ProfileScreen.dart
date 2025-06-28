@@ -8,6 +8,9 @@ import '../../repositories/order_repository.dart';
 import '../home_screen.dart';
 import '../orders/order_list_screen.dart';
 import 'edit_profil_screen.dart';
+import '../../../blocs/auth/auth_bloc.dart';
+import '../../../blocs/auth/auth_event.dart';
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -110,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             }
                           },
                           child: const Text(
-                            "Edit",
+                            "Modifier",
                             style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black),
                           ),
                         )
@@ -119,23 +122,85 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(height: 8),
-                  _buildMenuItem("Wishlist", LucideIcons.heart),
+                  _buildMenuItem("Favoris", LucideIcons.heart),
                   const SizedBox(height: 8),
-                  _buildMenuItem("Payment", LucideIcons.creditCard),
+                  _buildMenuItem("Paiements", LucideIcons.creditCard),
                   const SizedBox(height: 8),
-                  _buildMenuItem("Help", LucideIcons.helpCircle),
+                  _buildMenuItem("Aide", LucideIcons.helpCircle),
                   const SizedBox(height: 8),
                   _buildMenuItem("Support", LucideIcons.headphones),
                   const Spacer(),
                   TextButton(
                     onPressed: () {
-                      // TODO: implémenter logout
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return Dialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            backgroundColor: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(24.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    'Se déconnecter ?',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Vous allez être redirigé vers l\'accueil. Êtes-vous sûr de vouloir vous déconnecter ?',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  const SizedBox(height: 24),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text(
+                                          'Non',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                          context.read<AuthBloc>().add(LogoutRequested());
+                                          Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+                                        },
+                                        child: const Text(
+                                          'Oui',
+                                          style: TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
                     },
                     child: const Text(
-                      "Sign Out",
+                      "Se déconnecter",
                       style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   ),
+
                   const SizedBox(height: 12),
                 ],
               );

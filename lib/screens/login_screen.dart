@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (state is AuthFailure) {
             ScaffoldMessenger.of(
               context,
-            ).showSnackBar(SnackBar(content: Text(state.message)));
+            ).showSnackBar(SnackBar(content: Text(state.error)));
           } else if (state is AuthSuccess) {
             Navigator.pushReplacementNamed(context, '/home');
           }
@@ -86,7 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Sign in',
+                      'Se Connecter',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      hintText: 'Email Address',
+                      hintText: 'Adresse Mail',
                       filled: true,
                       fillColor: Colors.grey[200],
                       border: OutlineInputBorder(
@@ -111,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
-                      hintText: 'Password',
+                      hintText: 'Mot de Passe',
                       filled: true,
                       fillColor: Colors.grey[200],
                       border: OutlineInputBorder(
@@ -138,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white,
                               )
                               : const Text(
-                                'Continue',
+                                'Continuer',
                                 style: TextStyle(color: Colors.white),
                               ),
                     ),
@@ -146,14 +146,43 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: const [
-                      Text("Don't have an Account ? "),
-                      Text(
-                        "Create One",
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                    children: [
+                      const Text("Vous n'avez pas de compte ? "),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/register');
+                        },
+                        child: const Text(
+                          "Créer un compte",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      )
+                      ,
                     ],
                   ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Mot de passe oublié ?"),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/forgot-password');
+                        },
+                        child: const Text(
+                          "Réinitialiser",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                      )
+                      ,
+                    ],
+                  ),
+
                   const SizedBox(height: 30),
                   _socialButton(icon: Icons.apple, text: 'Continue With Apple'),
                   _socialButton(
