@@ -1,80 +1,142 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:intl/intl.dart';
 
-class NotificationScreen extends StatelessWidget {
-  const NotificationScreen({super.key});
+import '../../blocs/notifications/notification_cubit.dart';
+import '../../blocs/notifications/notification_state.dart';
+import '../../models/notification.dart';
+
+class NotificationsScreen extends StatelessWidget {
+  const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Header
-              const Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'Notifications',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 100),
-              // Image + Texte
-              Center(
+      appBar: AppBar(
+        title: const Text("Notifications"),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
+      body: BlocBuilder<NotificationCubit, NotificationState>(
+        builder: (context, state) {
+          if (state is NotificationLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is NotificationLoaded) {
+            final notifications = state.notifications;
+
+            if (notifications.isEmpty) {
+              return Center(
                 child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset(
-                      'assets/bell.png', // Ajoute une image de cloche dans tes assets
-                      height: 120,
+                    const Icon(
+                      LucideIcons.bell,
+                      size: 64,
+                      color: Colors.grey,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 16),
                     const Text(
-                      'No Notification yet',
-                      style: TextStyle(
-                        fontSize: 18,
-                      ),
+                      "Pas de notifications",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-      // Bottom Navigation Bar
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
-        currentIndex: 1, // L'index de la page actuelle (notifications)
-        onTap: (index) {
-          // Navigation entre les pages
-          switch (index) {
-            case 0:
-              Navigator.pushReplacementNamed(context, '/home');
-              break;
-            case 1:
-              // Déjà sur cette page
-              break;
-            case 2:
-              Navigator.pushReplacementNamed(context, '/orders');
-              break;
-            case 3:
-              Navigator.pushReplacementNamed(context, '/profile');
-              break;
+              );
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: notifications.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final notif = notifications[index];
+                return NotificationCard(notification: notif);
+              },
+            );
+          } else {
+            return const Center(child: Text("Erreur lors du chargement."));
           }
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.article_outlined), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: ''),
-        ],
+      ),
+    );
+  }
+}
+
+class NotificationCard extends StatelessWidget {
+  final NotificationModel notification;
+
+  const NotificationCard({super.key, required this.notification});
+
+  String _formatDate(DateTime dateTime) {
+    return DateFormat('dd MMM yyyy à HH:mm', 'fr_FR').format(dateTime);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        if (!notification.isRead) {
+          context.read<NotificationCubit>().markAsRead(notification.id);
+        }
+        // TODO: Ajouter redirection selon le type si nécessaire
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                const Icon(LucideIcons.bell, size: 28),
+                if (!notification.isRead)
+                  const Positioned(
+                    top: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 4,
+                      backgroundColor: Colors.red,
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.title,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    notification.message,
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    _formatDate(notification.createdAt),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -7,10 +7,10 @@ import '../../blocs/orders/order_bloc.dart';
 import '../../repositories/order_repository.dart';
 import '../home_screen.dart';
 import '../orders/order_list_screen.dart';
+import '../wishlist_screen.dart';
 import 'edit_profil_screen.dart';
 import '../../../blocs/auth/auth_bloc.dart';
 import '../../../blocs/auth/auth_event.dart';
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -34,15 +34,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         break;
       case 2:
         Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => BlocProvider(
-      create: (_) => OrderBloc(OrderRepository()),
-      child: OrderListScreen(),
-    ),
-  ),
-);
-
+          context,
+          MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => OrderBloc(OrderRepository()),
+              child: OrderListScreen(),
+            ),
+          ),
+        );
         break;
       case 3:
         break;
@@ -122,7 +121,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 24),
                   const SizedBox(height: 8),
-                  _buildMenuItem("Favoris", LucideIcons.heart),
+                  _buildMenuItem("Favoris", LucideIcons.heart, () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const WishlistScreen()),
+                    );
+                  }),
                   const SizedBox(height: 8),
                   _buildMenuItem("Paiements", LucideIcons.creditCard),
                   const SizedBox(height: 8),
@@ -200,7 +204,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                     ),
                   ),
-
                   const SizedBox(height: 12),
                 ],
               );
@@ -254,7 +257,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildMenuItem(String title, IconData icon) {
+  Widget _buildMenuItem(String title, IconData icon, [VoidCallback? onTap]) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: ListTile(
@@ -266,7 +269,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-        onTap: () {},
+        onTap: onTap,
       ),
     );
   }

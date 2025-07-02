@@ -99,7 +99,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       );
                     },
-                    child: const Text('Add to Bag'),
+                    child: const Text('Ajouter '),
                   ),
                 ],
               ),
@@ -145,7 +145,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: DropdownButton<String>(
                     isExpanded: true,
-                    hint: const Text('Select Size'),
+                    hint: const Text('Choisir une taille'),
                     value: selectedSize,
                     underline: const SizedBox(),
                     onChanged: (value) {
@@ -174,7 +174,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Text("Quantity", style: TextStyle(fontSize: 16)),
+                      const Text("Quantité", style: TextStyle(fontSize: 16)),
                       const Spacer(),
                       IconButton(
                         icon: const Icon(Icons.remove),

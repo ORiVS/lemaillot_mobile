@@ -3,10 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../blocs/notifications/notification_cubit.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../blocs/profile/profile_cubit.dart';
+import '../blocs/wishlist/wishlist_cubit.dart';
+import '../blocs/wishlist/wishlist_state.dart';
 import '../models/product.dart';
+import '../repositories/notification_repository.dart';
 import '../repositories/product_repository.dart';
 import '../blocs/product_detail/product_detail_cubit.dart';
 import '../repositories/product_detail_repository.dart';
@@ -18,8 +22,11 @@ import '../blocs/orders/order_bloc.dart';
 import '../theme/app_icons.dart';
 import '../utils/auth_guard.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
+import 'notifications_screen.dart';
 import 'profile/ProfileScreen.dart';
 import '../repositories/dio_client.dart';
+import '../widgets/product_card.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,6 +38,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late ProductCubit _productCubit;
   int _selectedIndex = 0;
+  String _searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -42,21 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _productCubit.close();
+    _searchController.dispose();
     super.dispose();
-  }
-
-  Widget _buildBody() {
-    switch (_selectedIndex) {
-      case 0:
-        return _buildProductView();
-      case 2:
-        return BlocProvider(
-          create: (_) => OrderBloc(OrderRepository()),
-          child: OrderListScreen(),
-        );
-      default:
-        return const Center(child: Text('Screen in progress...'));
-    }
   }
 
   Widget _buildProductView() {
@@ -74,7 +70,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => BlocProvider(
-                        create: (_) => ProfileCubit(ProfileRepository(DioClient.createDio()))..loadProfile(),
+                        create: (_) =>
+                        ProfileCubit(ProfileRepository(DioClient.createDio()))
+                          ..loadProfile(),
                         child: const ProfileScreen(),
                       ),
                     ),
@@ -85,15 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundImage: AssetImage('assets/images/user.jpg'),
                 ),
               ),
-
-
               GestureDetector(
                 onTap: () async {
                   final allowed = await checkAuthOrPrompt(context);
                   if (allowed) {
                     Navigator.pushNamed(context, '/cart');
                   }
-                  },
+                },
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
@@ -106,20 +102,40 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 20),
+
+          // 🔍 Barre de recherche avec icône Clear
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const TextField(
+            child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase().trim();
+                });
+              },
               decoration: InputDecoration(
-                icon: Icon(AppIcons.search),
+                icon: const Icon(AppIcons.search),
                 hintText: 'Search',
                 border: InputBorder.none,
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                  },
+                )
+                    : null,
               ),
             ),
           ),
+
           const SizedBox(height: 24),
           const Align(
             alignment: Alignment.centerLeft,
@@ -129,22 +145,33 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 12),
+
+          // 🛍️ Liste des produits
           Expanded(
             child: BlocBuilder<ProductCubit, ProductState>(
               builder: (context, state) {
                 if (state is ProductLoading) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (state is ProductLoaded) {
+                  final filteredProducts = state.products.where((product) {
+                    return product.name.toLowerCase().contains(_searchQuery);
+                  }).toList();
+
+                  if (filteredProducts.isEmpty) {
+                    return const Center(child: Text('Aucun produit trouvé.'));
+                  }
+
                   return GridView.builder(
-                    itemCount: state.products.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    itemCount: filteredProducts.length,
+                    gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
                       childAspectRatio: 0.65,
                     ),
                     itemBuilder: (context, index) {
-                      return ProductCard(product: state.products[index]);
+                      return ProductCard(product: filteredProducts[index]);
                     },
                   );
                 } else if (state is ProductError) {
@@ -159,6 +186,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildBody() {
+    switch (_selectedIndex) {
+      case 0:
+        return _buildProductView();
+      case 1:
+        return BlocProvider(
+          create: (_) => NotificationCubit(NotificationRepository(baseUrl: dotenv.env['API_URL']!))
+            ..fetchNotifications(),
+          child: const NotificationsScreen(),
+        );
+      case 2:
+        return BlocProvider(
+          create: (_) => OrderBloc(OrderRepository()),
+          child: OrderListScreen(),
+        );
+      default:
+        return const Center(child: Text('Screen in progress...'));
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -171,84 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
           onItemTapped: (index) => setState(() => _selectedIndex = index),
         ),
         body: SafeArea(child: _buildBody()),
-      ),
-    );
-  }
-}
-
-class ProductCard extends StatelessWidget {
-  final Product product;
-  const ProductCard({super.key, required this.product});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (_) => ProductDetailCubit(repository: ProductDetailRepository()),
-              child: ProductDetailScreen(productId: product.id),
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.all(6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.grey[100],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(
-                    product.imageUrl,
-                    height: 140,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                const Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Icon(AppIcons.favorite),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              product.name,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Text(
-                  '${product.price.toStringAsFixed(0)} FCFA',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                if (product.discountPrice != null) const SizedBox(width: 6),
-                if (product.discountPrice != null)
-                  Text(
-                    '${product.discountPrice!.toStringAsFixed(0)} FCFA',
-                    style: const TextStyle(
-                      decoration: TextDecoration.lineThrough,
-                      color: Colors.grey,
-                      fontSize: 13,
-                    ),
-                  ),
-              ],
-            )
-          ],
-        ),
       ),
     );
   }
