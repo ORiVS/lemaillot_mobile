@@ -9,6 +9,10 @@ class CartLoading extends CartState {}
 class CartLoaded extends CartState {
   final Cart cart;
   CartLoaded(this.cart);
+
+  int get totalItems {
+    return cart.items.fold(0, (sum, item) => sum + item.quantity);
+  }
 }
 
 class CartError extends CartState {

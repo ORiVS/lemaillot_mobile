@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../blocs/cart/cart_bloc.dart';
+import '../blocs/cart/cart_state.dart';
 import '../blocs/notifications/notification_cubit.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
@@ -83,22 +85,60 @@ class _HomeScreenState extends State<HomeScreen> {
                   backgroundImage: AssetImage('assets/images/user.jpg'),
                 ),
               ),
-              GestureDetector(
-                onTap: () async {
-                  final allowed = await checkAuthOrPrompt(context);
-                  if (allowed) {
-                    Navigator.pushNamed(context, '/cart');
+              BlocBuilder<CartBloc, CartState>(
+                builder: (context, state) {
+                  int itemCount = 0;
+
+                  if (state is CartLoaded) {
+                    itemCount = state.cart.items.fold(0, (sum, item) => sum + item.quantity);
                   }
+
+                  return GestureDetector(
+                    onTap: () async {
+                      final allowed = await checkAuthOrPrompt(context);
+                      if (allowed) {
+                        Navigator.pushNamed(context, '/cart');
+                      }
+                    },
+                    child: Stack(
+                      alignment: Alignment.topRight,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black,
+                          ),
+                          child: const Icon(AppIcons.cart, color: Colors.white),
+                        ),
+                        if (itemCount > 0)
+                          Positioned(
+                            right: -4,
+                            top: -4,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.red,
+                              ),
+                              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                              child: Text(
+                                '$itemCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  );
                 },
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.black,
-                  ),
-                  child: const Icon(AppIcons.cart, color: Colors.white),
-                ),
               ),
+
             ],
           ),
           const SizedBox(height: 20),
