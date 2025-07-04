@@ -6,6 +6,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../blocs/cart/cart_bloc.dart';
 import '../blocs/cart/cart_state.dart';
 import '../blocs/notifications/notification_cubit.dart';
+import '../blocs/notifications/notification_state.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../blocs/profile/profile_cubit.dart';
@@ -198,7 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }).toList();
 
                   if (filteredProducts.isEmpty) {
-                    return const Center(child: Text('Aucun produit trouvé.'));
+                    return const Center(child: Text('Aucun maillot trouvé.'));
                   }
 
                   return GridView.builder(
@@ -231,35 +232,52 @@ class _HomeScreenState extends State<HomeScreen> {
       case 0:
         return _buildProductView();
       case 1:
-        return BlocProvider(
-          create: (_) => NotificationCubit(NotificationRepository(baseUrl: dotenv.env['API_URL']!))
-            ..fetchNotifications(),
-          child: const NotificationsScreen(),
-        );
+        return const NotificationsScreen();
       case 2:
         return BlocProvider(
           create: (_) => OrderBloc(OrderRepository()),
           child: OrderListScreen(),
+        );
+      case 3:
+        return BlocProvider(
+          create: (_) => ProfileCubit(ProfileRepository(DioClient.createDio()))
+            ..loadProfile(),
+          child: const ProfileScreen(),
         );
       default:
         return const Center(child: Text('Screen in progress...'));
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _productCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _productCubit),
+        BlocProvider(
+          create: (_) => NotificationCubit(NotificationRepository(baseUrl: dotenv.env['API_URL']!))
+            ..fetchNotifications(), // Charger dès le début
+        ),
+      ],
       child: Scaffold(
         backgroundColor: Colors.white,
         extendBody: true,
-        bottomNavigationBar: CustomBottomNavBar(
-          selectedIndex: _selectedIndex,
-          onItemTapped: (index) => setState(() => _selectedIndex = index),
+        bottomNavigationBar: BlocBuilder<NotificationCubit, NotificationState>(
+          builder: (context, notifState) {
+            bool hasUnread = false;
+            if (notifState is NotificationLoaded) {
+              hasUnread = notifState.hasUnread;
+            }
+            return CustomBottomNavBar(
+              selectedIndex: _selectedIndex,
+              onItemTapped: (index) => setState(() => _selectedIndex = index),
+              hasUnreadNotifications: hasUnread,
+            );
+          },
         ),
         body: SafeArea(child: _buildBody()),
       ),
     );
   }
+
 }

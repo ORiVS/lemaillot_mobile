@@ -215,45 +215,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           },
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-        child: Container(
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 12,
-                offset: Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              GestureDetector(
-                onTap: () => _onTabTapped(0),
-                child: Icon(LucideIcons.home, color: _selectedIndex == 0 ? Colors.black : Colors.grey),
-              ),
-              GestureDetector(
-                onTap: () => _onTabTapped(1),
-                child: Icon(LucideIcons.bell, color: _selectedIndex == 1 ? Colors.black : Colors.grey),
-              ),
-              GestureDetector(
-                onTap: () => _onTabTapped(2),
-                child: Icon(LucideIcons.fileText, color: _selectedIndex == 2 ? Colors.black : Colors.grey),
-              ),
-              GestureDetector(
-                onTap: () => _onTabTapped(3),
-                child: Icon(LucideIcons.user, color: _selectedIndex == 3 ? Colors.black : Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

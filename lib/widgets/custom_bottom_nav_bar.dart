@@ -5,11 +5,13 @@ import '../theme/app_icons.dart';
 class CustomBottomNavBar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemTapped;
+  final bool hasUnreadNotifications;
 
   const CustomBottomNavBar({
     super.key,
     required this.selectedIndex,
     required this.onItemTapped,
+    this.hasUnreadNotifications = false,
   });
 
   @override
@@ -44,12 +46,33 @@ class CustomBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({required IconData icon, required int index}) {
+    bool showBadge = (index == 1 && hasUnreadNotifications);
+
     return GestureDetector(
       onTap: () => onItemTapped(index),
-      child: Icon(
-        icon,
-        color: selectedIndex == index ? Colors.black : Colors.grey,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Icon(
+            icon,
+            color: selectedIndex == index ? Colors.black : Colors.grey,
+          ),
+          if (showBadge)
+            Positioned(
+              top: -4,
+              right: -4,
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
+
 }

@@ -4,6 +4,7 @@ import '../blocs/product_detail/product_detail_cubit.dart';
 import '../blocs/wishlist/wishlist_cubit.dart';
 import '../blocs/wishlist/wishlist_state.dart';
 import '../models/product.dart';
+import '../models/product_image.dart';
 import '../repositories/product_detail_repository.dart';
 import '../screens/product_detail_screen.dart';
 

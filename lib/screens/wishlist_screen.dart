@@ -8,6 +8,7 @@ import '../../theme/app_icons.dart';
 import '../../screens/product_detail_screen.dart';
 import '../../blocs/product_detail/product_detail_cubit.dart';
 import '../../repositories/product_detail_repository.dart';
+import '../models/product_image.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});

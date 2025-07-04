@@ -1,4 +1,5 @@
 import 'package:lemaillot_mobile/models/product.dart';
+import 'package:lemaillot_mobile/models/product_image.dart';
 
 class WishlistItem {
   final int id;
