@@ -64,12 +64,52 @@ class _ProfileScreenState extends State<ProfileScreen> {
               return Column(
                 children: [
                   const SizedBox(height: 24),
-                  CircleAvatar(
-                    radius: 48,
-                    backgroundImage: profile.profilePicture != null
-                        ? NetworkImage(profile.profilePicture!)
-                        : const AssetImage('assets/images/avatar_placeholder.png') as ImageProvider,
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      CircleAvatar(
+                        radius: 48,
+                        backgroundColor: Colors.grey.shade300,
+                        child: Text(
+                          user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '',
+                          style: const TextStyle(
+                            fontSize: 32,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      GestureDetector(
+                        onTap: () {
+                          // Ouvre une modal ou déclenche la modification de l'image de profil
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditProfileScreen(
+                                user: user,
+                                profile: profile,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          padding: const EdgeInsets.all(6),
+                          child: const Icon(
+                            Icons.edit,
+                            size: 18,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+
                   const SizedBox(height: 24),
                   Container(
                     margin: const EdgeInsets.symmetric(horizontal: 16),

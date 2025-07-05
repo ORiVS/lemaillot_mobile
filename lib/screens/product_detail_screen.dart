@@ -17,6 +17,9 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int quantity = 1;
   String? selectedSize;
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+
 
   @override
   void initState() {
@@ -50,6 +53,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     SizedBox(
                       height: 300,
                       child: PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentIndex = index;
+                          });
+                        },
                         itemCount: product.gallery.isNotEmpty ? product.gallery.length : 1,
                         itemBuilder: (context, index) {
                           final imageUrl = product.gallery.isNotEmpty
@@ -65,8 +74,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           );
                         },
                       ),
+
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 12),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        product.gallery.isNotEmpty ? product.gallery.length : 1,
+                            (index) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          width: _currentIndex == index ? 10 : 6,
+                          height: _currentIndex == index ? 10 : 6,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentIndex == index ? Colors.black : Colors.grey[400],
+                          ),
+                        ),
+                      ),
+                    ),
 
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),

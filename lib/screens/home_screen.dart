@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../blocs/cart/cart_bloc.dart';
+import '../blocs/cart/cart_event.dart';
 import '../blocs/cart/cart_state.dart';
 import '../blocs/notifications/notification_cubit.dart';
 import '../blocs/notifications/notification_state.dart';
@@ -44,6 +45,17 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
+
+  Future<void> _handleRefresh() async {
+    _productCubit.fetchProducts(); // Async en interne, pas besoin de await ici
+    context.read<NotificationCubit>().fetchNotifications(); // idem
+    context.read<CartBloc>().add(LoadCart()); // Ne pas await un add()
+    await Future.delayed(const Duration(milliseconds: 500)); // Optionnel : pour animation
+  }
+
+
+
+
   @override
   void initState() {
     super.initState();
@@ -61,169 +73,185 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildProductView() {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Header : avatar + panier
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        color: Colors.black,
+        backgroundColor: Colors.white,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
             children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BlocProvider(
-                        create: (_) =>
-                        ProfileCubit(ProfileRepository(DioClient.createDio()))
-                          ..loadProfile(),
-                        child: const ProfileScreen(),
-                      ),
-                    ),
-                  );
-                },
-                child: const CircleAvatar(
-                  radius: 22,
-                  backgroundImage: AssetImage('assets/images/user.jpg'),
-                ),
-              ),
-              BlocBuilder<CartBloc, CartState>(
-                builder: (context, state) {
-                  int itemCount = 0;
-
-                  if (state is CartLoaded) {
-                    itemCount = state.cart.items.fold(0, (sum, item) => sum + item.quantity);
-                  }
-
-                  return GestureDetector(
-                    onTap: () async {
-                      final allowed = await checkAuthOrPrompt(context);
-                      if (allowed) {
-                        Navigator.pushNamed(context, '/cart');
-                      }
-                    },
-                    child: Stack(
-                      alignment: Alignment.topRight,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black,
+              // Header : avatar + panier
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (_) =>
+                            ProfileCubit(ProfileRepository(DioClient.createDio()))
+                              ..loadProfile(),
+                            child: const ProfileScreen(),
                           ),
-                          child: const Icon(AppIcons.cart, color: Colors.white),
                         ),
-                        if (itemCount > 0)
-                          Positioned(
-                            right: -4,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
+                      );
+                    },
+                    child: const CircleAvatar(
+                      radius: 22,
+                      backgroundImage: AssetImage('assets/images/user.jpg'),
+                    ),
+                  ),
+                  BlocBuilder<CartBloc, CartState>(
+                    builder: (context, state) {
+                      int itemCount = 0;
+
+                      if (state is CartLoaded) {
+                        itemCount = state.cart.items.fold(0, (sum, item) => sum + item.quantity);
+                      }
+
+                      return GestureDetector(
+                        onTap: () async {
+                          final allowed = await checkAuthOrPrompt(context);
+                          if (allowed) {
+                            Navigator.pushNamed(context, '/cart');
+                          }
+                        },
+                        child: Stack(
+                          alignment: Alignment.topRight,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.red,
+                                color: Colors.black,
                               ),
-                              constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
-                              child: Text(
-                                '$itemCount',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
+                              child: const Icon(AppIcons.cart, color: Colors.white),
                             ),
-                          ),
-                      ],
-                    ),
-                  );
-                },
+                            if (itemCount > 0)
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: Colors.red,
+                                  ),
+                                  constraints: const BoxConstraints(minWidth: 20, minHeight: 20),
+                                  child: Text(
+                                    '$itemCount',
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+
+                ],
               ),
+              const SizedBox(height: 20),
+
+              // 🔍 Barre de recherche avec icône Clear
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() {
+                      _searchQuery = value.toLowerCase().trim();
+                    });
+                  },
+                  decoration: InputDecoration(
+                    icon: const Icon(AppIcons.search),
+                    hintText: 'Rechercher un maillot',
+                    border: InputBorder.none,
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                        setState(() {
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                        : null,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Tous les maillots',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+          BlocBuilder<ProductCubit, ProductState>(
+            builder: (context, state) {
+              if (state is ProductLoading) {
+                return const Padding(
+                  padding: EdgeInsets.only(top: 48),
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              } else if (state is ProductLoaded) {
+                final filteredProducts = state.products.where((product) {
+                  return product.name.toLowerCase().contains(_searchQuery);
+                }).toList();
+
+                if (filteredProducts.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 48),
+                    child: Center(child: Text('Aucun maillot trouvé.')),
+                  );
+                }
+
+                return GridView.builder(
+                  physics: const NeverScrollableScrollPhysics(), // ⚠️ on empêche le scroll interne
+                  shrinkWrap: true, // ✅ important
+                  itemCount: filteredProducts.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 0.65,
+                  ),
+                  itemBuilder: (context, index) {
+                    return ProductCard(product: filteredProducts[index]);
+                  },
+                );
+              } else if (state is ProductError) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 48),
+                  child: Center(child: Text(state.message)),
+                );
+              }
+              return const SizedBox();
+            },
+          ),
 
             ],
           ),
-          const SizedBox(height: 20),
-
-          // 🔍 Barre de recherche avec icône Clear
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value.toLowerCase().trim();
-                });
-              },
-              decoration: InputDecoration(
-                icon: const Icon(AppIcons.search),
-                hintText: 'Search',
-                border: InputBorder.none,
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _searchController.clear();
-                    setState(() {
-                      _searchQuery = '';
-                    });
-                  },
-                )
-                    : null,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 24),
-          const Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Tous les maillots',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // 🛍️ Liste des produits
-          Expanded(
-            child: BlocBuilder<ProductCubit, ProductState>(
-              builder: (context, state) {
-                if (state is ProductLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is ProductLoaded) {
-                  final filteredProducts = state.products.where((product) {
-                    return product.name.toLowerCase().contains(_searchQuery);
-                  }).toList();
-
-                  if (filteredProducts.isEmpty) {
-                    return const Center(child: Text('Aucun maillot trouvé.'));
-                  }
-
-                  return GridView.builder(
-                    itemCount: filteredProducts.length,
-                    gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 16,
-                      crossAxisSpacing: 16,
-                      childAspectRatio: 0.65,
-                    ),
-                    itemBuilder: (context, index) {
-                      return ProductCard(product: filteredProducts[index]);
-                    },
-                  );
-                } else if (state is ProductError) {
-                  return Center(child: Text(state.message));
-                }
-                return const SizedBox();
-              },
-            ),
-          ),
-        ],
-      ),
+        ),
+      )
     );
   }
 
