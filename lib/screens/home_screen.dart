@@ -44,6 +44,8 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
+  String _sortOption = 'default';
+
 
 
   Future<void> _handleRefresh() async {
@@ -162,38 +164,90 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
 
-              // 🔍 Barre de recherche avec icône Clear
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value.toLowerCase().trim();
-                    });
-                  },
-                  decoration: InputDecoration(
-                    icon: const Icon(AppIcons.search),
-                    hintText: 'Rechercher un maillot',
-                    border: InputBorder.none,
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {
-                          _searchQuery = '';
-                        });
+// 🔍 Barre de recherche + Bouton de tri
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0),
+                child: Row(
+                  children: [
+                    // 🔍 Barre de recherche avec Clear
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[200],
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(AppIcons.search, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _searchQuery = value.toLowerCase().trim();
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                  hintText: 'Rechercher un maillot',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            if (_searchQuery.isNotEmpty)
+                              GestureDetector(
+                                onTap: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _searchQuery = '';
+                                  });
+                                },
+                                child: const Icon(Icons.close, size: 20, color: Colors.grey),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(width: 8),
+
+                    // 🔽🔼 Bouton tri
+                    PopupMenuButton<String>(
+                      onSelected: (value) {
+                        setState(() => _sortOption = value);
                       },
-                    )
-                        : null,
-                  ),
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      icon: SizedBox(
+                        width: 32,
+                        height: 32,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: const [
+                            Positioned(
+                              top: 3,
+                              child: Icon(LucideIcons.chevronUp, size: 16),
+                            ),
+                            Positioned(
+                              bottom: 3,
+                              child: Icon(LucideIcons.chevronDown, size: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(value: 'default', child: Text('Pertinence')),
+                        PopupMenuItem(value: 'price_low', child: Text('Prix croissant')),
+                        PopupMenuItem(value: 'price_high', child: Text('Prix décroissant')),
+                        PopupMenuItem(value: 'new', child: Text('Nouveautés')),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+
+
 
               const SizedBox(height: 24),
               const Align(
@@ -216,7 +270,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 final filteredProducts = state.products.where((product) {
                   return product.name.toLowerCase().contains(_searchQuery);
                 }).toList();
-
+                if (_sortOption == 'price_low') {
+                  filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+                } else if (_sortOption == 'price_high') {
+                  filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+                } else if (_sortOption == 'new') {
+                  filteredProducts.sort((b, a) => a.isNew ? 1 : -1);
+                }
                 if (filteredProducts.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.only(top: 48),

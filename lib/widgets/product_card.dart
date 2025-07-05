@@ -4,7 +4,6 @@ import '../blocs/product_detail/product_detail_cubit.dart';
 import '../blocs/wishlist/wishlist_cubit.dart';
 import '../blocs/wishlist/wishlist_state.dart';
 import '../models/product.dart';
-import '../models/product_image.dart';
 import '../repositories/product_detail_repository.dart';
 import '../screens/product_detail_screen.dart';
 
@@ -36,7 +35,7 @@ class ProductCard extends StatelessWidget {
             );
           },
           child: Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               color: Colors.grey[100],
@@ -44,15 +43,17 @@ class ProductCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // 🖼️ Image avec bon ratio et ajustement
                 Stack(
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        product.imageUrl,
-                        height: 140,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Image.network(
+                          product.imageUrl,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -62,7 +63,7 @@ class ProductCard extends StatelessWidget {
                         onTap: () {
                           final cubit = context.read<WishlistCubit>();
                           if (isWishlisted) {
-                            cubit.remove(product.id); // ici product.id est un int
+                            cubit.remove(product.id);
                           } else {
                             cubit.add(product.id);
                           }
@@ -108,7 +109,7 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                   ],
-                )
+                ),
               ],
             ),
           ),

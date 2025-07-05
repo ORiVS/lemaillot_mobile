@@ -9,6 +9,8 @@ class Product {
   final bool isNew;
   final bool isFeatured;
   final List<ProductImage> gallery;
+  final List<String> categories;
+
 
   Product({
     required this.id,
@@ -18,7 +20,9 @@ class Product {
     this.discountPrice,
     this.isNew = false,
     this.isFeatured = false,
-    required this.gallery
+    required this.gallery,
+    required this.categories,
+
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -36,7 +40,9 @@ class Product {
       gallery: (json['gallery'] as List)
           .map((img) => ProductImage.fromJson(img))
           .toList(),
-
+      categories: (json['categories'] as List)
+          .map((c) => c.toString().toLowerCase())
+          .toList(),
     );
   }
 }
