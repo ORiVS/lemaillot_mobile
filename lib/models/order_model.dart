@@ -33,6 +33,10 @@ class OrderModel {
   final double deliveryCost;
   final String deliveryMethod;
   final String createdAt;
+  final String? deliveryAddress;
+  final String? deliveryCity;
+  final String? deliveryPostalCode;
+  final String? deliveryCountry;
   final List<OrderItemModel> items;
 
   OrderModel({
@@ -44,6 +48,10 @@ class OrderModel {
     required this.deliveryCost,
     required this.deliveryMethod,
     required this.createdAt,
+    required this.deliveryAddress,
+    required this.deliveryCity,
+    required this.deliveryPostalCode,
+    required this.deliveryCountry,
     required this.items,
   });
 
@@ -57,6 +65,10 @@ class OrderModel {
       deliveryCost: double.tryParse(json['delivery_cost'].toString()) ?? 0.0,
       deliveryMethod: json['delivery_method'],
       createdAt: json['created_at'],
+      deliveryAddress: json['delivery_address'],
+      deliveryCity: json['delivery_city'],
+      deliveryPostalCode: json['delivery_postal_code'],
+      deliveryCountry: json['delivery_country'],
       items: (json['items'] as List)
           .map((item) => OrderItemModel.fromJson(item))
           .toList(),
