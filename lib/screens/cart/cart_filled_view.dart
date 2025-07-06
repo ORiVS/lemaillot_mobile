@@ -29,8 +29,6 @@
               const SizedBox(height: 24),
               CartSummary(cart: cart),
               const SizedBox(height: 16),
-              CouponField(),
-              const SizedBox(height: 16),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,

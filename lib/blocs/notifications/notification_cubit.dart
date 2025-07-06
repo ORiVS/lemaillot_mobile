@@ -1,4 +1,3 @@
-// notification_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'notification_state.dart';
 import '../../models/notification.dart';
@@ -23,7 +22,7 @@ class NotificationCubit extends Cubit<NotificationState> {
     try {
       await repository.markAsRead(id);
 
-      // Met à jour localement l'état (optionnel mais recommandé)
+      // Mise à jour locale de l'état
       if (state is NotificationLoaded) {
         final current = (state as NotificationLoaded).notifications;
         final updated = current.map((notif) {
@@ -43,8 +42,15 @@ class NotificationCubit extends Cubit<NotificationState> {
         emit(NotificationLoaded(updated));
       }
     } catch (e) {
-      // Optionnel : afficher une erreur
+      // Erreur silencieuse (ou log si tu veux)
     }
   }
 
+  void deleteNotification(int id) {
+    if (state is NotificationLoaded) {
+      final current = (state as NotificationLoaded).notifications;
+      final updated = current.where((notif) => notif.id != id).toList();
+      emit(NotificationLoaded(updated));
+    }
+  }
 }

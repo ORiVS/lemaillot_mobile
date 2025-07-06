@@ -10,8 +10,8 @@ class CartSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildRow("Subtotal", cart.totalProducts),
-        _buildRow("Shipping Cost", cart.deliveryEstimate),
+        _buildRow("Sous-total", cart.totalProducts),
+        _buildRow("Frais de livraison", cart.deliveryEstimate),
         _buildRow("Tax", 0.0),
         const Divider(thickness: 1),
         _buildRow("Total", cart.estimatedTotal, bold: true),

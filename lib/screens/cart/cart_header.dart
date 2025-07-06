@@ -19,7 +19,7 @@ class CartHeader extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
           ),
           const Text(
-            "Cart",
+            "Panier",
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           TextButton(
