@@ -2,6 +2,9 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../utils/auth_guard.dart';
+import 'dio_client.dart';
+
 class AuthRepository {
   final Dio _dio = Dio(BaseOptions(baseUrl: dotenv.env['API_URL'] ?? ''));
 
@@ -12,36 +15,19 @@ class AuthRepository {
         data: {'email': email, 'password': password},
       );
 
-      if (response.statusCode == 200) {
-        final access = response.data['access'];
-        final refresh = response.data['refresh'];
+      final access = response.data['access'];
+      final refresh = response.data['refresh'];
 
-        if (access == null || refresh == null) {
-          throw Exception('Tokens manquants dans la réponse');
-        }
-
-        await saveTokens(access, refresh);
-        return access;
-      } else {
-        throw Exception(response.data['detail'] ?? 'Erreur inconnue');
+      if (access == null || refresh == null) {
+        throw Exception('Tokens manquants dans la réponse');
       }
+
+      await saveTokens(access, refresh);
+      return access;
     } on DioException catch (e) {
-      final statusCode = e.response?.statusCode;
-      final data = e.response?.data;
-
-      print('❌ DioException: statusCode=$statusCode');
-      print('❌ Response data: $data');
-      print('❌ Message: ${e.message}');
-
-      if (data is Map && data.containsKey('detail')) {
-        throw Exception(data['detail']);
-      } else if (e.message != null) {
-        throw Exception('Erreur réseau : ${e.message}');
-      } else {
-        throw Exception('Erreur inconnue');
-      }
+      print('❌ Login DioException: ${e.message}');
+      throw Exception(parseApiError(e));
     } catch (e) {
-      print('❌ Autre erreur : $e');
       throw Exception('Erreur inattendue : $e');
     }
   }
@@ -112,60 +98,26 @@ class AuthRepository {
         },
       );
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        print('✅ Inscription réussie. Redirigez vers la vérification.');
-        // Pas de token ici, la vérification sera faite après
-        return;
-      } else {
-        throw Exception(response.data['detail'] ?? 'Erreur lors de l’inscription');
-      }
+      print('✅ Inscription réussie');
     } on DioException catch (e) {
-      final data = e.response?.data;
-      print('❌ Inscription DioException: ${e.message}');
-      print('❌ Données retournées : $data');
-
-      if (data is Map && data.containsKey('detail')) {
-        throw Exception(data['detail']);
-      } else if (data is Map && data.isNotEmpty) {
-        // Affiche les premières erreurs retournées par DRF
-        final firstKey = data.keys.first;
-        final firstError = data[firstKey];
-        throw Exception('$firstKey: ${firstError[0]}');
-      } else {
-        throw Exception('Erreur réseau : ${e.message}');
-      }
+      print('❌ Register DioException: ${e.message}');
+      throw Exception(parseApiError(e));
     } catch (e) {
-      print('❌ Erreur inscription : $e');
       throw Exception('Erreur inattendue : $e');
     }
   }
-
 
   Future<String> verifyAccount(String email, String code) async {
     try {
       final response = await _dio.post(
         '/accounts/verify-code/',
-        data: {
-          'email': email,
-          'code': code,
-        },
+        data: {'email': email, 'code': code},
       );
 
-      if (response.statusCode == 200) {
-        // ✅ Lire le message
-        final message = response.data['message'] ?? 'Compte activé avec succès.';
-        return message;
-      } else {
-        throw Exception(response.data['detail'] ?? 'Échec de la vérification');
-      }
+      return response.data['message'] ?? 'Compte activé avec succès.';
     } on DioException catch (e) {
-      final data = e.response?.data;
-      print('❌ Erreur vérification Dio: ${e.message}');
-      if (data is Map && data.containsKey('detail')) {
-        throw Exception(data['detail']);
-      } else {
-        throw Exception('Erreur réseau : ${e.message}');
-      }
+      print('❌ Vérification DioException: ${e.message}');
+      throw Exception(parseApiError(e));
     } catch (e) {
       throw Exception('Erreur inattendue : $e');
     }
@@ -173,21 +125,17 @@ class AuthRepository {
 
   Future<void> resendCode(String email) async {
     try {
-      final response = await _dio.post(
-        '/accounts/resend-code/',
-        data: {
-          'email': email,
-          'method': 'email', // méthode toujours "email"
-        },
-      );
+      final dio = DioClient.createDio(withAuth: false);
 
-      if (response.statusCode != 200) {
-        throw Exception(response.data['detail'] ?? 'Erreur lors du renvoi du code');
-      }
+      await dio.post(
+        '/accounts/resend-code/',
+        data: {'email': email, 'method': 'email'},
+      );
     } on DioException catch (e) {
-      final data = e.response?.data;
-      print('❌ Erreur renvoi code Dio: ${e.message}');
-      throw Exception(data['detail'] ?? 'Erreur réseau : ${e.message}');
+      print('❌ Resend DioException: ${e.message}');
+      throw Exception(parseApiError(e));
+    } catch (e) {
+      throw Exception('Erreur inattendue : $e');
     }
   }
 }

@@ -8,10 +8,10 @@ class ProductCubit extends Cubit<ProductState> {
 
   ProductCubit({required this.repository}) : super(ProductLoading());
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts({String? categorySlug}) async {
     try {
       emit(ProductLoading());
-      final products = await repository.fetchAllProducts();
+      final products = await repository.fetchAllProducts(categorySlug: categorySlug);
       emit(ProductLoaded(products));
     } catch (e) {
       emit(ProductError('Échec du chargement'));

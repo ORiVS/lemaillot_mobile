@@ -6,6 +6,7 @@ import '../blocs/wishlist/wishlist_state.dart';
 import '../models/product.dart';
 import '../repositories/product_detail_repository.dart';
 import '../screens/product_detail_screen.dart';
+import '../utils/auth_guard.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -60,7 +61,10 @@ class ProductCard extends StatelessWidget {
                       top: 8,
                       right: 8,
                       child: GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          final allowed = await checkAuthOrPrompt(context);
+                          if (!allowed) return;
+
                           final cubit = context.read<WishlistCubit>();
                           if (isWishlisted) {
                             cubit.remove(product.id);

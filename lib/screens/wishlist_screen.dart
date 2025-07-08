@@ -8,7 +8,6 @@ import '../../theme/app_icons.dart';
 import '../../screens/product_detail_screen.dart';
 import '../../blocs/product_detail/product_detail_cubit.dart';
 import '../../repositories/product_detail_repository.dart';
-import '../models/product_image.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
@@ -17,40 +16,54 @@ class WishlistScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Mes Favoris'),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        foregroundColor: Colors.black,
-      ),
-      body: BlocBuilder<WishlistCubit, WishlistState>(
-        builder: (context, state) {
-          if (state is WishlistLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is WishlistLoaded) {
-            final items = state.wishlistItems;
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(top: 48.0, bottom: 8),
 
-            if (items.isEmpty) {
-              return const Center(child: Text("Aucun favori pour l'instant."));
-            }
+            child: Center(
+              child: Text(
+                "Mes favoris",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: items.length,
-              itemBuilder: (context, index) {
-                final product = items[index].product;
-                final wishlistItemId = items[index].id;
-                return WishlistCard(
-                  product: product,
-                  wishlistItemId: wishlistItemId,
-                );
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: BlocBuilder<WishlistCubit, WishlistState>(
+              builder: (context, state) {
+                if (state is WishlistLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is WishlistLoaded) {
+                  final items = state.wishlistItems;
+
+                  if (items.isEmpty) {
+                    return const Center(
+                      child: Text("Aucun favori pour l'instant."),
+                    );
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    itemCount: items.length,
+                    itemBuilder: (context, index) {
+                      final product = items[index].product;
+                      final wishlistItemId = items[index].id;
+                      return WishlistCard(
+                        product: product,
+                        wishlistItemId: wishlistItemId,
+                      );
+                    },
+                  );
+                } else {
+                  return const Center(child: Text('Erreur lors du chargement.'));
+                }
               },
-            );
-          } else {
-            return const Center(child: Text('Erreur lors du chargement.'));
-          }
-        },
+            ),
+          ),
+        ],
       ),
     );
   }

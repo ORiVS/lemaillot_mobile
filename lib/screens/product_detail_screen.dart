@@ -6,6 +6,7 @@ import '../blocs/cart/cart_bloc.dart';
 import '../blocs/cart/cart_event.dart';
 import '../blocs/wishlist/wishlist_cubit.dart';
 import '../blocs/wishlist/wishlist_state.dart';
+import '../utils/auth_guard.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final int productId;
@@ -234,7 +235,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       top: 40,
                       right: 16,
                       child: GestureDetector(
-                        onTap: () {
+                        onTap: () async {
+                          final allowed = await checkAuthOrPrompt(context);
+                          if (!allowed) return;
+
                           final cubit = context.read<WishlistCubit>();
                           if (isWishlisted) {
                             cubit.remove(product.id);
@@ -297,7 +301,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Expanded(
                       child: InkWell(
                         borderRadius: BorderRadius.circular(40),
-                        onTap: () {
+                        onTap: () async {
+                          final allowed = await checkAuthOrPrompt(context);
+                          if (!allowed) return;
+
                           if (selectedSize == null) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

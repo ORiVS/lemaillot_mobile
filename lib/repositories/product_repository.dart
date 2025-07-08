@@ -5,10 +5,20 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class ProductRepository {
   final Dio _dio = Dio(BaseOptions(baseUrl: dotenv.env['API_URL'] ?? ''));
 
-  Future<List<Product>> fetchAllProducts() async {
+  Future<List<Product>> fetchAllProducts({String? categorySlug}) async {
     print('🔗 API_URL utilisée : ${dotenv.env['API_URL']}');
+
     try {
-      final response = await _dio.get('/api/store/products/');
+      final queryParams = <String, dynamic>{};
+      if (categorySlug != null && categorySlug != 'Tous') {
+        queryParams['category'] = categorySlug;
+      }
+
+      final response = await _dio.get(
+        '/api/store/products/',
+        queryParameters: queryParams,
+      );
+
       print('📦 Requête produits envoyée, status : ${response.statusCode}');
       print('📦 Données reçues : ${response.data}');
 
@@ -25,4 +35,5 @@ class ProductRepository {
       rethrow;
     }
   }
+
 }

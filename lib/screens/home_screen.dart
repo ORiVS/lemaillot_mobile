@@ -11,6 +11,7 @@ import '../blocs/notifications/notification_state.dart';
 import '../blocs/product/product_cubit.dart';
 import '../blocs/product/product_state.dart';
 import '../blocs/profile/profile_cubit.dart';
+import '../blocs/profile/profile_state.dart';
 import '../blocs/wishlist/wishlist_cubit.dart';
 import '../blocs/wishlist/wishlist_state.dart';
 import '../models/product.dart';
@@ -45,6 +46,21 @@ class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   String _sortOption = 'default';
+
+  final Map<String, String> categoryLabels = {
+    'Tous': 'Tout',
+    'maillot-domicile': 'Domicile',
+    'maillot-exterieur': 'Extérieurs',
+    'third-kit': 'Third',
+    'retro': 'Rétro',
+    'selection-nationale': 'Pays',
+    'club-europeen': 'Clubs européens',
+    'club-africain': 'Clubs africains',
+  };
+
+  String selectedCategorySlug = 'Tous';
+
+
 
 
 
@@ -87,25 +103,48 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => BlocProvider(
-                            create: (_) =>
-                            ProfileCubit(ProfileRepository(DioClient.createDio()))
-                              ..loadProfile(),
-                            child: const ProfileScreen(),
-                          ),
-                        ),
-                      );
-                    },
-                    child: const CircleAvatar(
-                      radius: 22,
-                      backgroundImage: AssetImage('assets/images/user.jpg'),
+                  BlocProvider(
+                    create: (_) => ProfileCubit(ProfileRepository(DioClient.createDio()))..loadProfile(),
+                    child: BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, state) {
+                        if (state is ProfileLoaded) {
+                          final user = state.user;
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BlocProvider.value(
+                                    value: context.read<ProfileCubit>(),
+                                    child: const ProfileScreen(),
+                                  ),
+                                ),
+                              );
+                            },
+                            child: CircleAvatar(
+                              radius: 22,
+                              backgroundColor: Colors.grey.shade300,
+                              child: Text(
+                                user.firstName.isNotEmpty ? user.firstName[0].toUpperCase() : '',
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return const CircleAvatar(
+                            radius: 22,
+                            backgroundColor: Colors.grey,
+                            child: Icon(Icons.person, color: Colors.white),
+                          );
+                        }
+                      },
                     ),
                   ),
+
                   BlocBuilder<CartBloc, CartState>(
                     builder: (context, state) {
                       int itemCount = 0;
@@ -247,16 +286,54 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
 
-
-
+// Filtres par catégorie
               const SizedBox(height: 24),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Tous les maillots',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              SizedBox(
+                height: 36,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 0),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categoryLabels.length,
+                  itemBuilder: (context, index) {
+                    final slug = categoryLabels.keys.elementAt(index);
+                    final label = categoryLabels[slug]!;
+                    final isSelected = selectedCategorySlug == slug;
+
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          selectedCategorySlug = slug;
+                        });
+                        _productCubit.fetchProducts(categorySlug: slug);
+                      },
+
+                      child: Container(
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.black : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          label,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  categoryLabels[selectedCategorySlug] ?? 'Tous les maillots',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+
               const SizedBox(height: 12),
 
           BlocBuilder<ProductCubit, ProductState>(
@@ -268,7 +345,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               } else if (state is ProductLoaded) {
                 final filteredProducts = state.products.where((product) {
-                  return product.name.toLowerCase().contains(_searchQuery);
+                  final matchesSearch = product.name.toLowerCase().contains(_searchQuery);
+                  final matchesCategory = selectedCategorySlug == 'Tous' ||
+                      product.categories.contains(selectedCategorySlug.toLowerCase());
+                  return matchesSearch && matchesCategory;
                 }).toList();
                 if (_sortOption == 'price_low') {
                   filteredProducts.sort((a, b) => a.price.compareTo(b.price));
@@ -283,10 +363,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Center(child: Text('Aucun maillot trouvé.')),
                   );
                 }
-
                 return GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(), // ⚠️ on empêche le scroll interne
-                  shrinkWrap: true, // ✅ important
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
                   itemCount: filteredProducts.length,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
@@ -358,12 +437,24 @@ class _HomeScreenState extends State<HomeScreen> {
             }
             return CustomBottomNavBar(
               selectedIndex: _selectedIndex,
-              onItemTapped: (index) => setState(() => _selectedIndex = index),
               hasUnreadNotifications: hasUnread,
+              onItemTapped: (index) async {
+                // Onglets protégés : Notifications (1), Commandes (2), Profil (3)
+                final protectedTabs = [1, 2, 3];
+
+                if (protectedTabs.contains(index)) {
+                  final allowed = await checkAuthOrPrompt(context);
+                  if (!allowed) return;
+                }
+
+                setState(() => _selectedIndex = index);
+              },
             );
+
           },
         ),
         body: SafeArea(child: _buildBody()),
+
       ),
     );
   }

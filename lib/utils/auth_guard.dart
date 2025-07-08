@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_bloc.dart';
@@ -43,4 +44,25 @@ Future<bool> checkAuthOrPrompt(BuildContext context) async {
   }
 
   return false;
+}
+
+String parseApiError(DioException e) {
+  final data = e.response?.data;
+
+  if (data is Map<String, dynamic>) {
+    if (data.containsKey('error')) return data['error'].toString();
+    if (data.containsKey('detail')) return data['detail'].toString();
+
+    if (data.isNotEmpty) {
+      final firstKey = data.keys.first;
+      final firstError = data[firstKey];
+      if (firstError is List && firstError.isNotEmpty) {
+        return '$firstKey: ${firstError.first}';
+      } else if (firstError is String) {
+        return '$firstKey: $firstError';
+      }
+    }
+  }
+
+  return 'Erreur inconnue : ${e.message}';
 }

@@ -10,7 +10,7 @@ class CartHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 24.0, left: 16, right: 16, bottom: 8),
+      padding: const EdgeInsets.only(top: 48.0, left: 16, right: 16, bottom: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

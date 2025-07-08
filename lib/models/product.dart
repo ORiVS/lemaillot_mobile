@@ -40,7 +40,7 @@ class Product {
       gallery: (json['gallery'] as List)
           .map((img) => ProductImage.fromJson(img))
           .toList(),
-      categories: (json['categories'] as List)
+      categories: (json['category_slugs'] as List)
           .map((c) => c.toString().toLowerCase())
           .toList(),
     );

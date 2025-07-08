@@ -12,31 +12,30 @@ class DioClient {
       sendTimeout: const Duration(seconds: 20),
     ));
 
-    print('🕐 Dio Timeout config → '
-        'connectTimeout=${dio.options.connectTimeout}, '
-        'receiveTimeout=${dio.options.receiveTimeout}, '
-        'sendTimeout=${dio.options.sendTimeout}');
+    // Ajout d'une variable locale
+    final bool shouldAddAuth = withAuth;
 
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          if (withAuth) {
+          if (shouldAddAuth) {
             final prefs = await SharedPreferences.getInstance();
             final token = prefs.getString('access_token');
             if (token != null) {
               options.headers['Authorization'] = 'Bearer $token';
-              print('🔐 Token ajouté au header : $token');
-              print('🔐 Authorization header : ${options.headers['Authorization']}');
+              print('🔐 Authorization header ajouté : $token');
             } else {
-              print('⚠️ Aucun token trouvé');
+              print('⚠️ Aucun token disponible pour autorisation');
             }
+          } else {
+            print('🟡 Appel sans authentification');
           }
           return handler.next(options);
         },
         onError: (DioException e, handler) async {
           if (e.response?.statusCode == 401 &&
               e.response?.data['code'] == 'token_not_valid') {
-            print('🔐 Token expiré → redirection vers /login');
+            print('⛔ Token expiré → redirection /login');
 
             final prefs = await SharedPreferences.getInstance();
             await prefs.clear();

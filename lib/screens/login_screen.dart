@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
-                  Image.asset('assets/images/logo.png', height: 80),
+                  Image.asset('assets/images/LeMaillot_final.webp', height: 120),
                   const SizedBox(height: 30),
                   const Align(
                     alignment: Alignment.centerLeft,
@@ -184,14 +184,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
 
                   const SizedBox(height: 30),
-                  _socialButton(icon: Icons.apple, text: 'Continue With Apple'),
+
                   _socialButton(
                     icon: Icons.g_mobiledata,
-                    text: 'Continue With Google',
-                  ),
-                  _socialButton(
-                    icon: Icons.facebook,
-                    text: 'Continue With Facebook',
+                    text: 'Continuer avec Google',
                   ),
                   const SizedBox(height: 30),
                 ],
