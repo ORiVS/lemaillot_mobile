@@ -61,14 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
   String selectedCategorySlug = 'Tous';
 
 
-
-
-
   Future<void> _handleRefresh() async {
     _productCubit.fetchProducts(); // Async en interne, pas besoin de await ici
     context.read<NotificationCubit>().fetchNotifications(); // idem
     context.read<CartBloc>().add(LoadCart()); // Ne pas await un add()
-    await Future.delayed(const Duration(milliseconds: 500)); // Optionnel : pour animation
+    await Future.delayed(const Duration(milliseconds: 500));
   }
 
 
