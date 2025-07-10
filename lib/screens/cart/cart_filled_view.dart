@@ -1,10 +1,14 @@
   import 'package:flutter_bloc/flutter_bloc.dart';
   import '../../blocs/cart/cart_bloc.dart';
   import '../../blocs/cart/cart_event.dart';
-  import '../../models/cart.dart';
+  import '../../blocs/orders/order_bloc.dart';
+import '../../models/cart.dart';
   import 'package:flutter/material.dart';
 
-  import 'cart_coupon_field.dart';
+  import '../../repositories/dio_client.dart';
+import '../../repositories/order_repository.dart';
+import '../checkout/checkout_screen.dart';
+import 'cart_coupon_field.dart';
   import 'cart_item_tile.dart';
   import 'cart_summary.dart';
   import 'cart_header.dart';
@@ -36,9 +40,22 @@
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => BlocProvider(
+                        create: (_) => OrderBloc(
+                          orderRepository: OrderRepository(dio: DioClient.createDio()),
+                        ),
+                        child: CheckoutScreen(cart: cart),
+                      ),
+                    ),
+                  );
+                },
+
                 child: const Text("Commander", style: TextStyle(fontSize: 16)),
-              )
+              ),
             ],
           ),
 

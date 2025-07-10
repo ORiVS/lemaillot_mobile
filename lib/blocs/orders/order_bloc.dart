@@ -6,7 +6,7 @@ import 'order_state.dart';
 class OrderBloc extends Bloc<OrderEvent, OrderState> {
   final OrderRepository orderRepository;
 
-  OrderBloc(this.orderRepository) : super(OrderInitial()) {
+  OrderBloc({required this.orderRepository}) : super(OrderInitial()) {
     on<FetchOrders>((event, emit) async {
       emit(OrderLoading());
       try {
@@ -39,6 +39,25 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         emit(OrderPlaced(id));
       } catch (e) {
         emit(OrderError('Erreur lors du passage de la commande.'));
+      }
+    });
+
+    on<PlaceOrderAndPay>((event, emit) async {
+      emit(OrderLoading());
+
+      try {
+        final id = await orderRepository.placeOrder(
+          deliveryMethod: event.deliveryMethod,
+          latitude: event.latitude,
+          longitude: event.longitude,
+          items: event.items,
+        );
+
+        final checkoutUrl = await orderRepository.createStripeSession(id);
+
+        emit(RedirectToStripe(checkoutUrl));
+      } catch (e) {
+        emit(OrderError('Erreur lors du paiement de la commande.'));
       }
     });
   }

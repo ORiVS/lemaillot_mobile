@@ -25,3 +25,8 @@ class OrderError extends OrderState {
   final String message;
   OrderError(this.message);
 }
+
+class RedirectToStripe extends OrderState {
+  final String checkoutUrl;
+  RedirectToStripe(this.checkoutUrl);
+}

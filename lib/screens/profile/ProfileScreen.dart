@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../blocs/profile/profile_cubit.dart';
 import '../../../blocs/profile/profile_state.dart';
 import '../../blocs/orders/order_bloc.dart';
+import '../../repositories/dio_client.dart';
 import '../../repositories/order_repository.dart';
 import '../home_screen.dart';
 import '../orders/order_list_screen.dart';
@@ -37,7 +38,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           context,
           MaterialPageRoute(
             builder: (_) => BlocProvider(
-              create: (_) => OrderBloc(OrderRepository()),
+              create: (_) => OrderBloc(orderRepository: OrderRepository(dio: DioClient.createDio()),),
               child: OrderListScreen(),
             ),
           ),

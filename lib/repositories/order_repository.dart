@@ -1,17 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../models/order_model.dart';
-import 'dio_client.dart';
 
 class OrderRepository {
-  final Dio _dio = DioClient.createDio();
+  final Dio dio;
 
-  OrderRepository();
+  OrderRepository({required this.dio});
 
   Future<List<OrderModel>> fetchOrders() async {
     try {
       debugPrint('📦 Récupération des commandes...');
-      final response = await _dio.get('/orders/');
+      final response = await dio.get('/orders/');
       return (response.data as List)
           .map((e) => OrderModel.fromJson(e))
           .toList();
@@ -24,12 +23,20 @@ class OrderRepository {
   Future<OrderModel> fetchOrderDetail(int id) async {
     try {
       debugPrint('📦 Récupération du détail commande $id...');
-      final response = await _dio.get('/orders/$id/');
+      final response = await dio.get('/orders/$id/');
       return OrderModel.fromJson(response.data);
     } on DioException catch (e) {
       debugPrint('❌ Exception in fetchOrderDetail: ${e.message}');
       throw Exception("Erreur lors du chargement du détail de la commande");
     }
+  }
+
+  Future<String> createStripeSession(int orderId) async {
+    final response = await dio.post(
+      '/api/payments/create-checkout-session/',
+      data: {"order_id": orderId},
+    );
+    return response.data['checkout_url'];
   }
 
   Future<int> placeOrder({
@@ -40,14 +47,13 @@ class OrderRepository {
   }) async {
     final data = {
       "delivery_method": deliveryMethod,
-      "delivery_latitude": latitude,
-      "delivery_longitude": longitude,
       "items": items,
     };
 
     try {
       debugPrint('📤 Passage de la commande...');
-      final response = await _dio.post('/orders/create/', data: data);
+      debugPrint('📤 Données envoyées : $data');
+      final response = await dio.post('/orders/create/', data: data);
       return response.data['id'];
     } on DioException catch (e) {
       debugPrint('❌ Exception in placeOrder: ${e.message}');

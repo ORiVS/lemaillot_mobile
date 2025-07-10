@@ -402,7 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return const NotificationsScreen();
       case 2:
         return BlocProvider(
-          create: (_) => OrderBloc(OrderRepository()),
+          create: (_) => OrderBloc(orderRepository: OrderRepository(dio: DioClient.createDio()),),
           child: OrderListScreen(),
         );
       case 3:

@@ -20,3 +20,18 @@ class PlaceOrder extends OrderEvent {
     required this.items,
   });
 }
+
+class PlaceOrderAndPay extends OrderEvent {
+  final String deliveryMethod;
+  final double? latitude;
+  final double? longitude;
+  final List<Map<String, dynamic>> items;
+
+  PlaceOrderAndPay({
+    required this.deliveryMethod,
+    this.latitude,
+    this.longitude,
+    required this.items,
+  });
+}
+

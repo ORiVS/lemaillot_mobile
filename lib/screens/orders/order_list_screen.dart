@@ -6,6 +6,7 @@ import '../../blocs/orders/order_bloc.dart';
 import '../../blocs/orders/order_event.dart';
 import '../../blocs/orders/order_state.dart';
 import '../../models/order_model.dart';
+import '../../repositories/dio_client.dart';
 import '../../repositories/order_repository.dart';
 import '../../screens/orders/order_detail_screen.dart';
 import '../../models/order.dart';
@@ -177,7 +178,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                               context,
                               MaterialPageRoute(
                                 builder: (_) => BlocProvider(
-                                  create: (_) => OrderBloc(OrderRepository())
+                                  create: (_) => OrderBloc(orderRepository: OrderRepository(dio: DioClient.createDio()),)
                                     ..add(FetchOrderDetail(order.id)),
                                   child: OrderDetailScreen(orderId: order.id),
                                 ),
